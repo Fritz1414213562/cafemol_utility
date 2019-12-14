@@ -30,6 +30,7 @@ public:
 	int get_ResidueNumof(const int& query_atom_id);
 	int get_LocalResidueNumof(const int& query_atom_id);
 	std::vector<std::string> get_AtomNameContainer();
+	std::vector<std::string> get_ResidueNameContainer();
 	std::vector<int> convert_DNAID2dsDNAResi(const std::vector<int>& dna_ids);
 
 // semi-public

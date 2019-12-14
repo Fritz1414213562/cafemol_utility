@@ -145,6 +145,12 @@ std::vector<std::string> cafemol::PSFReader::get_AtomNameContainer() {
 }
 
 
+std::vector<std::string> cafemol::PSFReader::get_ResidueNameContainer() {
+	if (residue_name_container.empty()) error_output("have not yet read the file.");
+	return residue_name_container;
+}
+
+
 std::vector<int> cafemol::PSFReader::convert_DNAID2dsDNAResi(const std::vector<int>& dna_ids) {
 	if (chain_start_end_ids.empty()) error_output("have not yet read the file.");
     else if (chain_names.empty()) error_output("have not yet read chain names in the file.");

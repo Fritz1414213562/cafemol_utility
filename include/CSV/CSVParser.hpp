@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CSV_PARSER_HPP
+#define CSV_PARSER_HPP
+
 #include<string>
 #include<fstream>
 #include<iostream>
@@ -26,3 +28,5 @@ public:
 };
 
 }
+
+#endif /* CSV_PARSER_HPP */

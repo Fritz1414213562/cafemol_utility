@@ -6,5 +6,6 @@
 #include"ParseCommandLineArguments.hpp"
 #include"VectorCalculation.hpp"
 #include"ErrorMessage.hpp"
+#include"StandardOutput.hpp"
 
 #endif /* CAFEMOL_LIBRARY_HPP */

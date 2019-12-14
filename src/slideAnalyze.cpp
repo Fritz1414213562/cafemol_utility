@@ -11,19 +11,25 @@
 
 int main(int argc, char *argv[]) {
 
+	if (argc != 6) {
+		std::cerr << "Error: too much or less arguments" << std::endl;
+		std::exit(1);
+	}
+
 	// for file stream
     std::string dcd_name = argv[1];
 	std::string pdb_name = argv[2];
 	std::string output_name = argv[3];
+	std::string His8ChainID = argv[4];
+	int ARG_SHL = std::stoi(argv[5]);
     std::string dcd_suffix = "dcd";
 	std::string pdb_suffix = "pdb";
 	// ---------------------------------------------------------------------------------
 	// constant
-	int ARG_SHL = 116;
-	std::string His8ChainID = "C";
 	std::string DNAChainIDA = "A";
 	std::string DNAChainIDB = "B";
-	float cutoff = 10.0;
+	//float cutoff = 10.0;
+	float cutoff = 8.0;
 
 	// ---------------------------------------------------------------------------------
 	// File open

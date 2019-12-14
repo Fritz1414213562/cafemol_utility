@@ -1,5 +1,7 @@
 // PDBParser
-#pragma once
+#ifndef PDB_PARSER_HPP
+#define PDB_PARSER_HPP
+
 #include<string>
 #include<iostream>
 #include<fstream>
@@ -110,3 +112,5 @@ private:
 	}
 };
 }
+
+#endif /* PDB_PARSER_HPP */

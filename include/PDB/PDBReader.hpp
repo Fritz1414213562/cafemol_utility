@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PDB_READER_HPP
+#define PDB_READER_HPP
 #include"PDBParser.hpp"
 #include<string>
 #include<iostream>
@@ -70,3 +71,6 @@ private:
 
 };
 }
+
+
+#endif /* PDBReader */

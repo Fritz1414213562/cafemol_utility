@@ -1,5 +1,6 @@
 // This class can make pdb file from coordinates data.
-#pragma once
+#ifndef PDB_WRITER_HPP
+#define PDB_WRITER_HPP
 #include<string>
 #include<iostream>
 #include<fstream>
@@ -79,3 +80,6 @@ inline bool cafemol::PDBWriter::is_TERRow(const std::string& line) {
 	bool res = (rec_type == "TER");
 	return res;
 }
+
+
+#endif /* PDB_WRITER_HPP */

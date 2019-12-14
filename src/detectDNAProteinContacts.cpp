@@ -22,9 +22,10 @@ int main(int argc, char *argv[]) {
 	std::string output_name = argv[3];
 
 	// default value
-	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/pdns_residue_sort.par";
+	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address.par";
 	const float cutoff = 10.0;
 	const int block_size = 80;
+	const int elonged_601_length = 275;
 
 	// suffix
 	const std::array<std::string, 2> suffixes = {"dcd", "psf"};
@@ -80,7 +81,10 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	standard_output("The number of DNA atoms ->", total_DNA_atom_num);
+	standard_output("The number of DNA atoms ->", total_DNA_atom_num, "");
+
+	int unwrapped_num = elonged_601_length - total_DNA_atom_num;
+	standard_output("The number of processed DNA ->", unwrapped_num);
 	standard_output.output_HyphenBlock("", block_size);
 
 	// -----------------------------------------------------------------------------------------
@@ -124,7 +128,7 @@ int main(int argc, char *argv[]) {
 		ofs << "Frame " << iframe << std::endl;
 		for (std::size_t pdns_idx = 0; pdns_idx < output_data[iframe].size(); ++pdns_idx) {
 			if (output_data[iframe][pdns_idx] <= 0) continue;
-			ofs << output_data[iframe][pdns_idx] << " " << pdns_idx + 1 << std::endl;
+			ofs << unwrapped_num + output_data[iframe][pdns_idx] << " " << pdns_idx + 1 << std::endl;
 		}
 	}
 	ofs.close();

@@ -33,9 +33,11 @@ CALCPDNSQSCORE= calcPDNSQscore.o
 SORTPDNSRESIDUE= sortPDNSResidue.o
 DETECTDNAPROTEINCONTACTS= detectDNAProteinContacts.o
 GENERATEDNAPROHEATMAP= generateDNAProteinHeatMap.o
+CALCCONTACTSTATEPROB= calcContactStateProbability.o
+GETPDNSELECON= getPDNS_ELEContacts.o
 
 TEST= test/read_psf.o
-ALL= ../include/DCD/DCDAnalyzer.o ../include/DCD/DCDParser.o ../include/DCD/DCDReader.o ../include/PDB/PDBParser.o ../include/PDB/PDBReader.o ../include/PDB/PDBWriter.o ../include/misc/FileOpenJudge.o ../include/misc/DensityFunction.o slideAnalyze.o makePDBfromDCD.o searchNativeContact.o convertHistData.o nativeContactedRange.o ../include/NINFO/NinfoParser.o ../include/NINFO/NinfoReader.o calcQScore.o searchContactedHistoneChain.o getProteinResiContacted2DNA.o searchUnwrappedExtent.o searchDNAContacted2Dyad.o helicaseProcessingExtent.o calcPDNSQscore.o sortPDNSResidue.o detectDNAProteinContacts.o generateDNAProteinHeatMap.o
+ALL= ../include/DCD/DCDAnalyzer.o ../include/DCD/DCDParser.o ../include/DCD/DCDReader.o ../include/PDB/PDBParser.o ../include/PDB/PDBReader.o ../include/PDB/PDBWriter.o ../include/misc/FileOpenJudge.o ../include/misc/DensityFunction.o slideAnalyze.o makePDBfromDCD.o searchNativeContact.o convertHistData.o nativeContactedRange.o ../include/NINFO/NinfoParser.o ../include/NINFO/NinfoReader.o calcQScore.o searchContactedHistoneChain.o getProteinResiContacted2DNA.o searchUnwrappedExtent.o searchDNAContacted2Dyad.o helicaseProcessingExtent.o calcPDNSQscore.o sortPDNSResidue.o detectDNAProteinContacts.o generateDNAProteinHeatMap.o calcContactStateProbability.o getPDNS_ELEContacts.o
 
 SLIDEEXE= slide
 PDBFROMDCDEXE= dcd2pdb
@@ -52,6 +54,8 @@ CALCPDNSQSCOREEXE= pdnsqscore
 SORTPDNSRESIDUEEXE= sortpdns
 DETECTDNAPROTEINCONTACTSEXE= detectdnaprocontact
 GENERATEDNAPROHEATMAPEXE= pdnsmapping
+CALCCONTACTSTATEPROBEXE= contactstate2prob
+GETPDNSELECONEXE= getcontactaddress
 
 TESTEXE= test
 
@@ -87,6 +91,10 @@ SORTPDNS= $(SORTPDNSRESIDUE) $(addprefix $(DCDDIR)/, $(DCDANALYSIS)) $(addprefix
 DETECTDNAPROCONTACT= $(DETECTDNAPROTEINCONTACTS) $(addprefix $(DCDDIR)/, $(DCDANALYSIS)) $(addprefix $(PSFDIR)/, $(PSFREAD))
 
 PDNSMAPPING= $(GENERATEDNAPROHEATMAP) $(addprefix $(DCDDIR)/, $(DCDANALYSIS)) $(addprefix $(PSFDIR)/, $(PSFREAD))
+
+CONTACTSTATE2PROB= $(CALCCONTACTSTATEPROB) $(addprefix $(PSFDIR)/, $(PSFREAD))
+
+GETCONTACTADDRESS= $(GETPDNSELECON) $(addprefix $(PSFDIR)/, $(PSFREAD)) $(addprefix $(PDBDIR)/, $(PDBREAD))
 
 
 slide: $(SLIDEANALYZE)
@@ -137,6 +145,12 @@ detectdnaprocontact: $(DETECTDNAPROCONTACT)
 
 pdnsmapping: $(PDNSMAPPING)
 	$(CC) $(INCLUDE) -o $(addprefix $(EXEDIR)/, $(GENERATEDNAPROHEATMAPEXE)) $(PDNSMAPPING)
+
+contactstate2prob: $(CONTACTSTATE2PROB)
+	$(CC) $(INCLUDE) -o $(addprefix $(EXEDIR)/, $(CALCCONTACTSTATEPROBEXE)) $(CONTACTSTATE2PROB)
+
+getcontactaddress: $(GETCONTACTADDRESS)
+	$(CC) $(INCLUDE) -o $(addprefix $(EXEDIR)/, $(GETPDNSELECONEXE)) $(GETCONTACTADDRESS)
 
 clean:
 	rm $(ALL)
