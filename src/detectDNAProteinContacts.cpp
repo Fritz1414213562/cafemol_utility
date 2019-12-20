@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 	standard_output("The number of DNA atoms ->", total_DNA_atom_num, "");
 
-	int unwrapped_num = elonged_601_length - total_DNA_atom_num;
+	int unwrapped_num = elonged_601_length - (total_DNA_atom_num + 2) / 6;
 	standard_output("The number of processed DNA ->", unwrapped_num);
 	standard_output.output_HyphenBlock("", block_size);
 

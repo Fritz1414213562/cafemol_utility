@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
 	// constant
 	std::string DNAChainIDA = "A";
 	std::string DNAChainIDB = "B";
-	//float cutoff = 10.0;
-	float cutoff = 8.0;
+	float cutoff = 10.0;
+	//float cutoff = 8.0;
 
 	// ---------------------------------------------------------------------------------
 	// File open

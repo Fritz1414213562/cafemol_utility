@@ -126,8 +126,11 @@ int main(int argc, char *argv[]) {
 		
 		if (is_first) continue;
 
+	//	std::cout << frame_read << std::endl;
+		
 		++result[std::stoi(line_list[0]) - 1][std::stoi(line_list[1]) - 1];
 	}
+	ifs.close();
 
 	standard_output("The number of frames ->", frame_read);
 	standard_output("The last frame number ->", last_frame_num);

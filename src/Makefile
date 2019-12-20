@@ -35,9 +35,10 @@ DETECTDNAPROTEINCONTACTS= detectDNAProteinContacts.o
 GENERATEDNAPROHEATMAP= generateDNAProteinHeatMap.o
 CALCCONTACTSTATEPROB= calcContactStateProbability.o
 GETPDNSELECON= getPDNS_ELEContacts.o
+SHOWSTATETRANSITION= showStateTransition.o
 
 TEST= test/read_psf.o
-ALL= ../include/DCD/DCDAnalyzer.o ../include/DCD/DCDParser.o ../include/DCD/DCDReader.o ../include/PDB/PDBParser.o ../include/PDB/PDBReader.o ../include/PDB/PDBWriter.o ../include/misc/FileOpenJudge.o ../include/misc/DensityFunction.o slideAnalyze.o makePDBfromDCD.o searchNativeContact.o convertHistData.o nativeContactedRange.o ../include/NINFO/NinfoParser.o ../include/NINFO/NinfoReader.o calcQScore.o searchContactedHistoneChain.o getProteinResiContacted2DNA.o searchUnwrappedExtent.o searchDNAContacted2Dyad.o helicaseProcessingExtent.o calcPDNSQscore.o sortPDNSResidue.o detectDNAProteinContacts.o generateDNAProteinHeatMap.o calcContactStateProbability.o getPDNS_ELEContacts.o
+ALL= ../include/DCD/DCDAnalyzer.o ../include/DCD/DCDParser.o ../include/DCD/DCDReader.o ../include/PDB/PDBParser.o ../include/PDB/PDBReader.o ../include/PDB/PDBWriter.o ../include/misc/FileOpenJudge.o ../include/misc/DensityFunction.o slideAnalyze.o makePDBfromDCD.o searchNativeContact.o convertHistData.o nativeContactedRange.o ../include/NINFO/NinfoParser.o ../include/NINFO/NinfoReader.o calcQScore.o searchContactedHistoneChain.o getProteinResiContacted2DNA.o searchUnwrappedExtent.o searchDNAContacted2Dyad.o helicaseProcessingExtent.o calcPDNSQscore.o sortPDNSResidue.o detectDNAProteinContacts.o generateDNAProteinHeatMap.o calcContactStateProbability.o getPDNS_ELEContacts.o showStateTransition.o
 
 SLIDEEXE= slide
 PDBFROMDCDEXE= dcd2pdb
@@ -56,6 +57,7 @@ DETECTDNAPROTEINCONTACTSEXE= detectdnaprocontact
 GENERATEDNAPROHEATMAPEXE= pdnsmapping
 CALCCONTACTSTATEPROBEXE= contactstate2prob
 GETPDNSELECONEXE= getcontactaddress
+SHOWSTATETRANSITIONEXE= showstates
 
 TESTEXE= test
 
@@ -95,6 +97,8 @@ PDNSMAPPING= $(GENERATEDNAPROHEATMAP) $(addprefix $(DCDDIR)/, $(DCDANALYSIS)) $(
 CONTACTSTATE2PROB= $(CALCCONTACTSTATEPROB) $(addprefix $(PSFDIR)/, $(PSFREAD))
 
 GETCONTACTADDRESS= $(GETPDNSELECON) $(addprefix $(PSFDIR)/, $(PSFREAD)) $(addprefix $(PDBDIR)/, $(PDBREAD))
+
+SHOWSTATES= $(SHOWSTATETRANSITION) $(addprefix $(MISCDIR)/, $(FILEJUDGE))
 
 
 slide: $(SLIDEANALYZE)
@@ -151,6 +155,9 @@ contactstate2prob: $(CONTACTSTATE2PROB)
 
 getcontactaddress: $(GETCONTACTADDRESS)
 	$(CC) $(INCLUDE) -o $(addprefix $(EXEDIR)/, $(GETPDNSELECONEXE)) $(GETCONTACTADDRESS)
+
+showstates: $(SHOWSTATES)
+	$(CC) $(INCLUDE) -o $(addprefix $(EXEDIR)/, $(SHOWSTATETRANSITIONEXE)) $(SHOWSTATES)
 
 clean:
 	rm $(ALL)
