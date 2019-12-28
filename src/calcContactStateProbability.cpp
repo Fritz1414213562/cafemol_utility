@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	//// parameter file
 	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address.par";
 	//// block size
-	const int block_size = 80;
+	const int block_size = 100;
 	//// for contact state file format
 	const char delimiter = ' ';
 	const char ignore_char = '*';
