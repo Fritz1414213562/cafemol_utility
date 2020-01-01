@@ -13,8 +13,8 @@ namespace cafemol {
 class DCDReader : public DCDParser {
 
 public :
-	DCDReader(const std::string input_file_name);
-	std::array<std::vector<float>, 3> get_SnapShot_at(const int i_frame);
+	DCDReader(const std::string& input_file_name);
+	std::array<std::vector<float>, 3> get_SnapShot_at(const int frame_in_snapshot);
 
 };
 

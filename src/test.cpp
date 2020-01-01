@@ -13,9 +13,9 @@ int main(int argc, char *argv[]) {
 	std::string outputfilename = argv[2];
 
 	int i_start = 0;
-	int nstep_save = 1000;
-	int n_tstep = 100000;
-	int n_units = 18;
+	int nstep_save = 100;
+	int n_tstep = 10000;
+	int n_units = 1;
 	float delta = 0.3;
 	int ver = 24;
 

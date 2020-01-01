@@ -1,6 +1,6 @@
 #include"DCDReader.hpp"
 
-cafemol::DCDReader::DCDReader(const std::string input_file_name) : DCDParser(input_file_name) {
+cafemol::DCDReader::DCDReader(const std::string& input_file_name) : DCDParser(input_file_name) {
 	frame_num = 0;
 	atom_num = 0;
 }

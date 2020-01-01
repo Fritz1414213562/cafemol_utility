@@ -19,7 +19,7 @@ public:
 
 
 	// test
-	void copy_DCD(const int& istart, const int& nstep_save, const int& number_of_steps, const int& number_of_units, const float& delta, const int& version);
+	void copy_DCD(int& istart, int& nstep_save, int& number_of_steps, int& number_of_units, float& delta, int& version);
 
 private:
 
@@ -30,9 +30,16 @@ private:
 		third_block_size = 4,
 
 		// block unit
-		block_unit = 4,
 	};
 
+	char block_char = '=';
+	char block_space = ' ';
+	char CORD_C = 'C';
+	char CORD_O = 'O';
+	char CORD_R = 'R';
+	char CORD_D = 'D';
+	int i_zero = 0;
+	int block_unit = 4;
 
 	std::string output_name;
 
@@ -54,14 +61,16 @@ private:
 
 //	template<BLOCK_SIZES block_number, typename ...Types>
 	template<typename ...Types>
-	void write_Block(std::ofstream& ofs, const Types& ...arguments) {
+	void write_Block(std::ofstream& ofs, Types& ...arguments) {
 
 		std::tuple<Types...> args_tuple = std::make_tuple(arguments...);
 		// calculate the total type size of tuple elements
-		constexpr int tuple_elements_size = count_TupleElementsSize(args_tuple);
+//		constexpr int tuple_elements_size = count_TupleElementsSize(args_tuple);
+		int tuple_elements_size = count_TupleElementsSize(args_tuple);
 		// check the block_size
 //		static_assert(block_number == tuple_elements_size, "Block size is not consistent with tuple elements size");
 
+		std::cout << tuple_elements_size << std::endl;
 		// block_size
 		write_Binary(tuple_elements_size, ofs);
 		// write body of the block
@@ -74,7 +83,7 @@ private:
 	// compile-time methods
 
 	template<std::size_t iterative_num = 0, typename Tuple_Type>
-	constexpr int count_TupleElementsSize(const Tuple_Type& Tuple) {
+	constexpr int count_TupleElementsSize(Tuple_Type& Tuple) {
 
 		static_assert((0 <= iterative_num) || (iterative_num < std::tuple_size<Tuple_Type>::value), "Invalid Index, out of tuple range");
 
@@ -88,19 +97,23 @@ private:
 
 
 	// for writing each block
-	void write_1stBlock(std::ofstream& ofs, const int& frame_number, const int& istart, const int& nstep_save, const int& number_of_steps, const int& number_of_units, const float& delta, const int& version) {
-		write_Block(ofs, 'C', 'O', 'R', 'D', frame_number, istart, nstep_save, number_of_steps, number_of_units, 0, 0, 0, 0, delta, 0, 0, 0, 0, 0, 0, 0, 0, 0, version);
+	void write_1stBlock(std::ofstream& ofs, int& frame_number, int& istart, int& nstep_save, int& number_of_steps, int& number_of_units, float& delta, int& version) {
+//	void write_1stBlock(std::ofstream& ofs, const int& frame_number, const int& istart, const int& nstep_save, const int& number_of_steps, const int& number_of_units, const float& delta, const int& version);
+		write_Block(ofs, CORD_C, CORD_O, CORD_R, CORD_D, frame_number, istart, nstep_save, number_of_steps, number_of_units, i_zero, i_zero, i_zero, i_zero, delta, i_zero, i_zero, i_zero, i_zero, i_zero, i_zero, i_zero, i_zero, i_zero, version);
 	}
 
 	void write_2ndBlock(std::ofstream& ofs) {
-		write_Block(ofs, 4, '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=', '=');
+//	void write_2ndBlock(std::ofstream& ofs);
+		write_Block(ofs, block_unit, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char, block_char);
 	}
 
-	void write_3rdBlock(std::ofstream& ofs, const int& atom_number) {
+	void write_3rdBlock(std::ofstream& ofs, int& atom_number) {
+//	void write_3rdBlock(std::ofstream& ofs,  int& atom_number);
 		write_Block(ofs, atom_number);
 	}
 
-	void write_Body(std::ofstream& ofs, const std::array<std::vector<float>, 3>& xyz);
+//
+	void write_Body(std::ofstream& ofs, std::array<std::vector<float>, 3>& xyz);
 
 };
 }
