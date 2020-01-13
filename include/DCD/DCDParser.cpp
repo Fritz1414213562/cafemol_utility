@@ -77,14 +77,14 @@ std::string cafemol::DCDParser::read_block() {
 
 
 int cafemol::DCDParser::read_frame_num(const std::string& first_block) {
-    int frame_num = read_binary_as<int>(&first_block.at(byte_size));
-    return frame_num;
+	int frame_number = read_binary_as<int>(&first_block.at(byte_size));
+	return frame_number;
 }
 
 
 int cafemol::DCDParser::read_atom_num(const std::string& second_block) {
-    int atom_num = read_binary_as<int>(&second_block.at(0));
-    return atom_num;
+	int atom_number = read_binary_as<int>(&second_block.at(0));
+    return atom_number;
 }
 
 

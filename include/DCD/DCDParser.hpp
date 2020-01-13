@@ -34,6 +34,8 @@ protected :
     std::string input_name;
 	int frame_num;
 	int atom_num;
+//	int frame_num;
+//	int atom_num;
 	cafemol::error_handling::Error_Output error_output = cafemol::error_handling::Error_Output();
     
     template<typename T>

@@ -62,7 +62,7 @@ public:
 			}
 	
 			// search the suffix consistent with filesuffix
-			int result_idx = 0;
+			std::size_t result_idx = 0;
 			for (const std::string& answer_suffix : answer_suffixes) {
 				if (answer_suffix != suffix) {
 					++result_idx;

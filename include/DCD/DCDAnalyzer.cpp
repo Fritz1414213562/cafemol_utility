@@ -365,6 +365,10 @@ std::vector<int> cafemol::DCDAnalyzer::get_NativeContacts(const std::vector<int>
 		std::cerr << "Error: This trajectory doesn't have the snapshot of the frame '" << frame << "'" << std::endl;
 		std::exit(1);
 	}
+	else if (frame < 1) {
+		std::cerr << "Error: Frame number is smaller than 1" << std::endl;
+		std::exit(1);
+	}
 
 	for (std::size_t iframe = 0; iframe < frame - 1; ++iframe) {
 		read_xyz(atom_num);

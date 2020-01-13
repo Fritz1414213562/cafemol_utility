@@ -1,4 +1,4 @@
-#include"/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/include/misc/DensityFunction.hpp"
+#include"DensityFunction.hpp"
 
 
 void cafemol::DensityFunction::set_DataRange(const float& data_left_lim, const float& data_right_lim){

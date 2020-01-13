@@ -7,5 +7,6 @@
 #include"VectorCalculation.hpp"
 #include"ErrorMessage.hpp"
 #include"StandardOutput.hpp"
+#include"UtilFunc.hpp"
 
 #endif /* CAFEMOL_LIBRARY_HPP */

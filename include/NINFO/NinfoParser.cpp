@@ -48,7 +48,7 @@ std::string cafemol::NinfoParser::get_Headof(const std::string& line) {
 	std::vector<std::string> line_vec = split_Line(line, ninfo_delimiter);
 	std::string res;
 	if (line_vec.empty()) return res;
-	else if (!line_vec.empty())  return line_vec[0];
+	else return line_vec[0];
 }
 
 
