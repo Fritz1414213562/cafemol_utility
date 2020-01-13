@@ -47,7 +47,7 @@ void cafemol::FileOpenJudge::SuffixJudge(const std::string& filename, const std:
 	std::string reverse_suffix;
 
 	std::size_t filename_length = filename.size();
-	int reverse_idx = filename_length;
+	std::size_t reverse_idx = filename_length;
 
 	for (int idx = filename_length - 1; idx >= 0; --idx) {
 		const char suffix_str = filename[idx];
