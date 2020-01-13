@@ -1,6 +1,8 @@
 #ifndef DCD_WRITER_HPP
 #define DCD_WRITER_HPP
 #include"DCDParser.hpp"
+#include<Eigen/Core>
+#include<BestFitFunction.hpp>
 #include<iostream>
 #include<fstream>
 #include<vector>
@@ -10,12 +12,14 @@
 
 namespace cafemol {
 
-class DCDWriter : DCDParser {
+class DCDWriter : public DCDParser {
 
 public:
 	
 	DCDWriter(const std::string& output_file_name);
 	DCDWriter(const std::string& output_file_name, const std::string& input_file_name);
+
+	void best_fit_convert(int& istart, int& nstep_save, int& number_of_steps, int& number_of_units, float& delta, int& version);
 
 
 	// test
@@ -43,6 +47,15 @@ private:
 
 	std::string output_name;
 
+	cafemol::library::Best_Fit_Performer best_fit = cafemol::library::Best_Fit_Performer();
+
+// implement in cpp file
+
+	void write_Body(std::ofstream& ofs, std::array<std::vector<float>, 3>& xyz);
+
+	void write_Body(std::ofstream& ofs, Eigen::Matrix<float, Eigen::Dynamic, 3>& xyz);
+
+// inline function
 
 	template<typename T>
 	void write_Binary(T& value, std::ofstream& ofs) {
@@ -113,8 +126,6 @@ private:
 	}
 
 //
-	void write_Body(std::ofstream& ofs, std::array<std::vector<float>, 3>& xyz);
-
 };
 }
 
