@@ -77,7 +77,7 @@ std::vector<std::array<float, 3>> cafemol::PDBWriter::transpose_Mat(const std::a
 	// transpose
 	std::vector<std::array<float, 3>> result;
 
-	int vector_size = matrix[0].size();
+	std::size_t vector_size = matrix[0].size();
 	result.resize(vector_size);
 	
 	for (std::size_t idx = 0; idx < vector_size; ++idx) {

@@ -87,7 +87,7 @@ int cafemol::PSFReader::get_ResidueNumof(const int& query_atom_id) {
 		std::exit(1);
 	}
 	
-	int idx = 0;
+	std::size_t idx = 0;
 	for (const int& atom_id : atom_id_container) {
 		if (atom_id == query_atom_id) break;
 		++idx;
@@ -236,7 +236,7 @@ void cafemol::PSFReader::read_AtomInfo(const int& atom_num) {
 	charge_container.resize(atom_num);
 	mass_container.resize(atom_num);
 
-	for (std::size_t line_idx = 0; line_idx < atom_num; ++line_idx) {
+	for (int line_idx = 0; line_idx < atom_num; ++line_idx) {
 		std::string line;
 		std::getline(ifs, line);
 		atom_id_container[line_idx] = get_AtomID(line);
@@ -252,7 +252,7 @@ void cafemol::PSFReader::read_AtomInfo(const int& atom_num) {
 
 
 void cafemol::PSFReader::read_BondInfo(const int& bond_num) {
-	int row_size = (bond_num / 4) + 1;
+	std::size_t row_size = (bond_num / 4) + 1;
 
 	for (std::size_t line_idx = 0; line_idx < row_size; ++line_idx) {
 		std::string line;
@@ -263,7 +263,7 @@ void cafemol::PSFReader::read_BondInfo(const int& bond_num) {
 
 
 void cafemol::PSFReader::get_BondPair(const std::string& line) {
-	int line_length = line.size();
+	std::size_t line_length = line.size();
 	line_length = (line_length / 8) * 8;
 
 	for (std::size_t idx = 0; idx < line_length; idx += 16) {
