@@ -2,7 +2,7 @@
 CC=g++
 #CFLAGS= -std=c++17 -pedantic -Wall -g -v
 CFLAGS= -std=c++17 -pedantic -Wall -g 
-INCLUDE= -I. -I../include -I../include/misc
+INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3
 
 # directory
 DCDDIR= ../include/DCD
@@ -39,7 +39,7 @@ DCD2PDB= $(addprefix $(OBJDIR)/, makePDBfromDCD.o FileOpenJudge.o DCDReader.o DC
 SEARCHNATIVE= $(addprefix $(OBJDIR)/, searchNativeContact.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PDBReader.o PDBParser.o)
 NCRANGE= $(addprefix $(OBJDIR)/, nativeContactedRange.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PDBReader.o PDBParser.o)
 HISTOGRAM= $(addprefix $(OBJDIR)/, convertHistData.o DensityFunction.o)
-QSCORE= $(addprefix $(OBJDIR)/, calcQscore.o NinfoReader.o NinfoParser.o DCDAnalyzer.o DCDParser.o)
+QSCORE= $(addprefix $(OBJDIR)/, calcQScore.o NinfoReader.o NinfoParser.o DCDAnalyzer.o DCDParser.o)
 SEARCHCONTACTHISTONE= $(addprefix $(OBJDIR)/, searchContactedHistoneChain.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PSFReader.o PSFParser.o)
 GETPDNS= $(addprefix $(OBJDIR)/, getProteinResiContacted2DNA.o FileOpenJudge.o NinfoReader.o NinfoParser.o PSFReader.o PSFParser.o PDBReader.o PDBParser.o)
 UNWRAPEXTENT= $(addprefix $(OBJDIR)/, searchUnwrappedExtent.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PSFReader.o PSFParser.o NinfoReader.o NinfoParser.o)
@@ -52,7 +52,10 @@ PDNSMAPPING= $(addprefix $(OBJDIR)/, generateDNAProteinHeatMap.o DCDAnalyzer.o D
 CONTACTSTATE2PROB= $(addprefix $(OBJDIR)/, calcContactStateProbability.o PSFReader.o PSFParser.o)
 GETCONTACTADDRESS= $(addprefix $(OBJDIR)/, getPDNS_ELEContacts.o PSFReader.o PSFParser.o PDBReader.o PDBParser.o)
 SHOWSTATES= $(addprefix $(OBJDIR)/, showStateTransition.o FileOpenJudge.o)
-TEST= $(addprefix $(OBJDIR)/, test.o DCDWriter.o DCDParser.o)
+BESTFITCONVERT= $(addprefix $(OBJDIR)/, BestFitFunction.o DCDWriter.o DCDParser.o FileOpenJudge.o bestfitConverter.o)
+PCA2DCD= $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o DCDReader.o DCDParser.o PrincipalComponentAnalysis.o BestFitFunction.o FileOpenJudge.o)
+#TEST= $(addprefix $(OBJDIR)/, test.o DCDWriter.o DCDParser.o)
+TEST= $(addprefix $(OBJDIR)/, test.o DCDReader.o DCDParser.o)
 
 
 slide: $(SLIDE)
@@ -109,9 +112,15 @@ getcontactaddress: $(GETCONTACTADDRESS)
 showstates: $(SHOWSTATES)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, showstates) $(SHOWSTATES)
 
+bestfitconvert: $(BESTFITCONVERT)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, bestfitconvert) $(BESTFITCONVERT)
+
+pca2dcd: $(PCA2DCD)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, pca2dcd) $(PCA2DCD)
+
 # clean
 clean:
-	rm obj/*.o
+	rm obj/*.o ../bin/*
 
 test: $(TEST)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, test) $(TEST)
@@ -159,6 +168,12 @@ $(addprefix $(OBJDIR)/, FileOpenJudge.o): $(addprefix $(MISCDIR)/, FileOpenJudge
 $(addprefix $(OBJDIR)/, DensityFunction.o): $(addprefix $(MISCDIR)/, DensityFunction.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, DensityFunction.o) -c $(addprefix $(MISCDIR)/, DensityFunction.cpp)
 
+$(addprefix $(OBJDIR)/, BestFitFunction.o): $(addprefix $(MISCDIR)/, BestFitFunction.cpp)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, BestFitFunction.o) -c $(addprefix $(MISCDIR)/, BestFitFunction.cpp)
+
+$(addprefix $(OBJDIR)/, PrincipalComponentAnalysis.o): $(addprefix $(MISCDIR)/, PrincipalComponentAnalysis.cpp)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, PrincipalComponentAnalysis.o) -c $(addprefix $(MISCDIR)/, PrincipalComponentAnalysis.cpp)
+
 # mains
 
 $(addprefix $(OBJDIR)/, slideAnalyze.o): slideAnalyze.cpp
@@ -176,8 +191,8 @@ $(addprefix $(OBJDIR)/, nativeContactedRange.o): nativeContactedRange.cpp
 $(addprefix $(OBJDIR)/, convertHistData.o): convertHistData.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, convertHistData.o) -c convertHistData.cpp
 
-$(addprefix $(OBJDIR)/, calcQscore.o): calcQscore.cpp
-	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, calcQscore.o) -c calcQscore.cpp
+$(addprefix $(OBJDIR)/, calcQScore.o): calcQScore.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, calcQScore.o) -c calcQScore.cpp
 
 $(addprefix $(OBJDIR)/, searchContactedHistoneChain.o): searchContactedHistoneChain.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, searchContactedHistoneChain.o) -c searchContactedHistoneChain.cpp
@@ -215,6 +230,11 @@ $(addprefix $(OBJDIR)/, getPDNS_ELEContacts.o): getPDNS_ELEContacts.cpp
 $(addprefix $(OBJDIR)/, showStateTransition.o): showStateTransition.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, showStateTransition.o) -c showStateTransition.cpp
 
+$(addprefix $(OBJDIR)/, bestfitConverter.o): bestfitConverter.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, bestfitConverter.o) -c bestfitConverter.cpp
+
+$(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o): performPCA2DCDtrajectory.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o) -c performPCA2DCDtrajectory.cpp
+
 $(addprefix $(OBJDIR)/, test.o): test.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, test.o) -c test.cpp
-
