@@ -24,6 +24,8 @@ public:
 
 	PSFReader() = default;
 	PSFReader(const std::string& filename);
+
+	std::vector<std::size_t> get_DNAIDs();
 	
 	std::vector<psf_data_type::psf_chain_info> get_ChainInfoOfPSF();
 	std::vector<std::array<int, 2>> get_ResidueBeginEnds();

@@ -59,6 +59,37 @@ std::vector<std::string> cafemol::PSFReader::search_ChainKind() {
 }
 
 
+std::vector<std::size_t> cafemol::PSFReader::get_DNAIDs() {
+
+	std::vector<cafemol::psf_data_type::psf_chain_info> chain_data = get_ChainInfoOfPSF();
+	std::cout << "Reading the atom ids belonging to DNA chains" << std::endl;
+	std::vector<std::size_t> dna_ids;
+	bool exists_DNA = false;
+
+	for (const cafemol::psf_data_type::psf_chain_info& chain_info : chain_data) {
+		const std::string& chain_kind_name = std::get<0>(chain_info);
+		if (chain_kind_name == "DNA") {
+			exists_DNA = true;
+			const std::array<int, 2>& chain_start_end = std::get<1>(chain_info);
+			if ((chain_start_end[0] < 1) || (chain_start_end[1] < 1)) {
+				std::cerr << "The atom id is negative value. The PSF File might be broken." << std::endl;
+				std::exit(1);
+			}
+	 		std::cout << chain_kind_name << ": " << chain_start_end[0] << "-" << chain_start_end[1] << std::endl;
+			for (std::size_t idx = chain_start_end[0]; idx <= chain_start_end[1]; ++idx) {
+				dna_ids.push_back(idx);
+			}
+		}
+	}
+	if (!exists_DNA) {
+		std::cerr << "Error: This model have no DNA chains" << std::endl;
+		std::exit(1);
+	}
+
+	return dna_ids;
+}
+
+
 std::vector<cafemol::psf_data_type::psf_chain_info> cafemol::PSFReader::get_ChainInfoOfPSF() {
 
 	read_ATOM_BOND();
@@ -285,6 +316,7 @@ void cafemol::PSFReader::skip_RowsUntil(const std::string& block_name, int& bloc
 		if (block_kind[0] != '!') continue;
 		else if (block_kind != block_name) {
 			std::cerr << "Error: This file does not have '" << block_name << "' row" << std::endl;
+			std::cerr << "The 'block_kind' is " << block_kind << std::endl;
 			std::exit(1);
 		}
 		else if (block_kind == block_name) {
