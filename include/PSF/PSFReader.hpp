@@ -25,10 +25,17 @@ public:
 	PSFReader() = default;
 	PSFReader(const std::string& filename);
 
+	// for get chain named "chain_name"
+	std::vector<std::size_t> get_IDs(const std::string& chain_name);
+	// for DNA chain
 	std::vector<std::size_t> get_DNAIDs();
+	std::vector<std::size_t> get_AlignedDNAIDs();
+	// for Protein chain
+	std::vector<std::size_t> get_ProteinIDs();
 	
 	std::vector<psf_data_type::psf_chain_info> get_ChainInfoOfPSF();
 	std::vector<std::array<int, 2>> get_ResidueBeginEnds();
+
 	int get_ResidueNumof(const int& query_atom_id);
 	int get_LocalResidueNumof(const int& query_atom_id);
 	std::vector<std::string> get_AtomNameContainer();

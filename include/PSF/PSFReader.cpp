@@ -58,12 +58,56 @@ std::vector<std::string> cafemol::PSFReader::search_ChainKind() {
 	return result;
 }
 
+std::vector<std::size_t> cafemol::PSFReader::get_IDs(const std::string& chain_name) {
+
+	const std::vector<cafemol::psf_data_type::psf_chain_info>& chain_data = get_ChainInfoOfPSF();
+	std::vector<std::size_t> atom_ids;
+	bool exists_chain = false;
+
+	for (const cafemol::psf_data_type::psf_chain_info& chain_info : chain_data) {
+		const std::string& chain_kind_name = std::get<0>(chain_info);
+		if (chain_kind_name == chain_name) {
+			exists_chain = true;
+			const std::array<int, 2>& chain_start_end = std::get<1>(chain_info);
+			if ((chain_start_end[0] < 1) || (chain_start_end[1] < 1)) {
+				std::cerr << "The atom id is negative value. The PSF File might be broken." << std::endl;
+				std::exit(1);
+			}
+	 		std::cout << chain_kind_name << ": " << chain_start_end[0] << "-" << chain_start_end[1] << std::endl;
+			for (std::size_t idx = chain_start_end[0]; idx <= chain_start_end[1]; ++idx) {
+				atom_ids.push_back(idx);
+			}
+		}
+	}
+	if (!exists_chain) {
+		std::cerr << "Error: This model have no chains named, " + chain_name << std::endl;
+		std::exit(1);
+	}
+
+	return atom_ids;
+}
+
 
 std::vector<std::size_t> cafemol::PSFReader::get_DNAIDs() {
 
-	std::vector<cafemol::psf_data_type::psf_chain_info> chain_data = get_ChainInfoOfPSF();
 	std::cout << "Reading the atom ids belonging to DNA chains" << std::endl;
-	std::vector<std::size_t> dna_ids;
+	return get_IDs("DNA");
+}
+
+
+std::vector<std::size_t> cafemol::PSFReader::get_ProteinIDs() {
+
+	std::cout << "Reading the atom ids belonging to Protein chains" << std::endl;
+	return get_IDs("Protein");
+}
+
+
+std::vector<std::size_t> cafemol::PSFReader::get_AlignedDNAIDs() {
+
+	const std::vector<cafemol::psf_data_type::psf_chain_info>& chain_data = get_ChainInfoOfPSF();
+	std::cout << "Reading the atom ids belonging to DNA chains" << std::endl;
+	std::vector<std::size_t> aligned_dna_ids;
+	std::vector<std::array<int, 2>> dna_ends;
 	bool exists_DNA = false;
 
 	for (const cafemol::psf_data_type::psf_chain_info& chain_info : chain_data) {
@@ -76,24 +120,45 @@ std::vector<std::size_t> cafemol::PSFReader::get_DNAIDs() {
 				std::exit(1);
 			}
 	 		std::cout << chain_kind_name << ": " << chain_start_end[0] << "-" << chain_start_end[1] << std::endl;
-			for (std::size_t idx = chain_start_end[0]; idx <= chain_start_end[1]; ++idx) {
-				dna_ids.push_back(idx);
-			}
+			dna_ends.push_back(chain_start_end);
 		}
 	}
 	if (!exists_DNA) {
 		std::cerr << "Error: This model have no DNA chains" << std::endl;
 		std::exit(1);
 	}
+	if (dna_ends.size() % 2 == 1) {
+		std::cerr << "Error: The number of DNA chain is not even." << std::endl;
+		std::exit(1);
+	}
+	std::cout << "Align the DNA ID along dsDNA residue" << std::endl;
 
-	return dna_ids;
+	const std::size_t& dsDNA_number = dna_ends.size() / 2;
+	for (std::size_t idx = 0; idx < dsDNA_number; ++idx) {
+		std::array<int, 2> DNA_chainA = dna_ends[2 * idx];
+		std::array<int, 2> DNA_chainB = dna_ends[2 * idx + 1];
+		if ((DNA_chainA[1] - DNA_chainA[0]) != (DNA_chainB[1] - DNA_chainB[0])) {
+			std::cerr << "Error: This DNA molecules have ssDNA region" << std::endl;
+			std::exit(1);
+		}
+
+		for (std::size_t dna_id_idx = 0; dna_id_idx < (DNA_chainA[1] - DNA_chainA[0] + 1); ++dna_id_idx) {
+			aligned_dna_ids.push_back(dna_id_idx + DNA_chainA[0]);
+			aligned_dna_ids.push_back(DNA_chainB[1] - dna_id_idx);
+		}
+	}
+	return aligned_dna_ids;
 }
 
 
 std::vector<cafemol::psf_data_type::psf_chain_info> cafemol::PSFReader::get_ChainInfoOfPSF() {
 
-	read_ATOM_BOND();
-	chain_names = search_ChainKind();
+	if (chain_start_end_ids.empty()) {
+		read_ATOM_BOND();
+	}
+	if (chain_names.empty()) {
+		chain_names = search_ChainKind();
+	}
 
 	if (chain_start_end_ids.size() != chain_names.size()) {
 		std::cerr << "Error: Something wrong! The size of Chain IDs is not consistent with that of Chain names" << std::endl;
