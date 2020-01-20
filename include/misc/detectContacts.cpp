@@ -38,10 +38,12 @@ std::vector<std::vector<float>> cafemol::ContactSearcher::get_DistanceMatrix(con
 	const std::size_t& atom_size = snapshot[0].size();
 
 	std::vector<std::vector<float>> result(atom_size);
+	for (std::size_t i_row = 0; i_row < atom_size; ++i_row) {
+		result[i_row].resize(atom_size, -1.0);
+	}
 
 	for (std::size_t i_atom = 0; i_atom < atom_size - 1; ++i_atom) {
 
-		result[i_atom].resize(atom_size, -1.0);
 		const std::array<float, 3>& vector_index_i = get_Vector(i_atom, snapshot);
 
 		for (std::size_t j_atom = i_atom; j_atom < atom_size; ++j_atom) {
@@ -53,11 +55,73 @@ std::vector<std::vector<float>> cafemol::ContactSearcher::get_DistanceMatrix(con
 						 (vector_index_i[idim] - vector_index_j[idim]);
 			}
 			if (dist2 > cutoff_length * cutoff_length) continue;
-			else result[i_atom][j_atom] = dist2;
+			else {
+				result[i_atom][j_atom] = dist2;
+				result[j_atom][i_atom] = dist2;
+			}
 		}
 	}
 	return result;
 
+}
+
+
+std::array<std::array<int, 2>, 2> cafemol::ContactSearcher::get_ContactEnds(const std::vector<std::size_t>& source_range, const std::vector<std::size_t>& target_range, const std::array<std::vector<float>, 3>& snapshot) {
+	if ((snapshot[0].size() != snapshot[1].size()) || (snapshot[0].size() != snapshot[2].size())) {
+		eout("The degree of freedom at each direction is not consistent. This trajectory might be broken.");
+	}
+	const std::size_t& atom_size = snapshot[0].size();
+	std::array<std::array<int, 2>, 2> result;
+	result[0] = {-1, -1};
+	result[1] = {-1, -1};
+	bool is_searched_from_forward = false;
+	bool is_searched_from_reverse = false;
+	
+	// search the contact from index 0
+	for (const std::size_t& source_id : source_range) {
+		const std::array<float, 3>& source_atom_vector = get_Vector(source_id - 1, snapshot);
+		for (const std::size_t& target_id : target_range) {
+			const std::array<float, 3>& target_atom_vector = get_Vector(target_id - 1, snapshot);
+			float dist2 = 0.;
+			for (std::size_t idim = 0; idim < 3; ++idim) {
+				dist2 += (target_atom_vector[idim] - source_atom_vector[idim]) * 
+						 (target_atom_vector[idim] - source_atom_vector[idim]);
+			}
+			if (dist2 > cutoff_length * cutoff_length) continue;
+			else {
+				result[0][0] = source_id;
+				result[0][1] = target_id;
+				is_searched_from_forward = true;
+				break;
+			}
+		}
+		if (is_searched_from_forward) break;
+	}
+
+	// search the contact from last index
+	const std::size_t& source_range_size = source_range.size();
+	for (int source_reverse_idx = source_range_size - 1; source_reverse_idx >= 0; --source_reverse_idx) {
+		const std::size_t& source_id = source_range[source_reverse_idx];
+		const std::array<float, 3>& source_atom_vector = get_Vector(source_id - 1, snapshot);
+		for (const std::size_t& target_id : target_range) {
+			const std::array<float, 3>& target_atom_vector = get_Vector(target_id - 1, snapshot);
+			float dist2 = 0.;
+			for (std::size_t idim = 0; idim < 3; ++idim) {
+				dist2 += (target_atom_vector[idim] - source_atom_vector[idim]) *
+						 (target_atom_vector[idim] - source_atom_vector[idim]);
+			}
+			if (dist2 > cutoff_length * cutoff_length) continue;
+			else {
+				result[1][0] = source_id;
+				result[1][1] = target_id;
+				is_searched_from_reverse = true;
+				break;
+			}
+		}
+		if (is_searched_from_reverse) break;
+	}
+
+	return result;
 }
 
 

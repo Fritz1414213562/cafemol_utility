@@ -25,6 +25,8 @@ public:
 
 	std::vector<std::vector<float>> get_DistanceMatrix(const std::array<std::vector<float>, 3>& snapshot);
 
+	std::array<std::array<int, 2>, 2> get_ContactEnds(const std::vector<std::size_t>& source_range, const std::vector<std::size_t>& target_range, const std::array<std::vector<float>, 3>& snapshot);
+
 
 private:
 	// default
