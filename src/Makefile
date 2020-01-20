@@ -1,5 +1,6 @@
 # compiler
 CC=g++
+#CC=/home/nagae/mygcc/bin/g++
 #CFLAGS= -std=c++17 -pedantic -Wall -g -v
 CFLAGS= -std=c++17 -pedantic -Wall -g 
 INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3
@@ -54,6 +55,10 @@ GETCONTACTADDRESS= $(addprefix $(OBJDIR)/, getPDNS_ELEContacts.o PSFReader.o PSF
 SHOWSTATES= $(addprefix $(OBJDIR)/, showStateTransition.o FileOpenJudge.o)
 BESTFITCONVERT= $(addprefix $(OBJDIR)/, BestFitFunction.o DCDWriter.o DCDParser.o FileOpenJudge.o bestfitConverter.o)
 PCA2DCD= $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o DCDReader.o DCDParser.o PrincipalComponentAnalysis.o BestFitFunction.o FileOpenJudge.o)
+
+CLOSESTDNAIDSEARCH= $(addprefix $(OBJDIR)/, closestDNAIDSearch.o DCDReader.o DCDParser.o PSFReader.o PSFParser.o detectContacts.o)
+CONTACTMAP= $(addprefix $(OBJDIR)/, ContactMap.o DCDReader.o DCDParser.o FileOpenJudge.o detectContacts.o)
+CONTACTRANGE= $(addprefix $(OBJDIR)/, ContactRange.o DCDReader.o DCDParser.o PSFReader.o PSFParser.o detectContacts.o)
 #TEST= $(addprefix $(OBJDIR)/, test.o DCDWriter.o DCDParser.o)
 TEST= $(addprefix $(OBJDIR)/, test.o DCDReader.o DCDParser.o)
 
@@ -118,6 +123,15 @@ bestfitconvert: $(BESTFITCONVERT)
 pca2dcd: $(PCA2DCD)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, pca2dcd) $(PCA2DCD)
 
+closestdnaidsearch: $(CLOSESTDNAIDSEARCH)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, closestdnaidsearch) $(CLOSESTDNAIDSEARCH)
+
+contactmap: $(CONTACTMAP)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, contactmap) $(CONTACTMAP)
+
+contactrange: $(CONTACTRANGE)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, contactrange) $(CONTACTRANGE)
+
 # clean
 clean:
 	rm obj/*.o ../bin/*
@@ -173,6 +187,9 @@ $(addprefix $(OBJDIR)/, BestFitFunction.o): $(addprefix $(MISCDIR)/, BestFitFunc
 
 $(addprefix $(OBJDIR)/, PrincipalComponentAnalysis.o): $(addprefix $(MISCDIR)/, PrincipalComponentAnalysis.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, PrincipalComponentAnalysis.o) -c $(addprefix $(MISCDIR)/, PrincipalComponentAnalysis.cpp)
+
+$(addprefix $(OBJDIR)/, detectContacts.o): $(addprefix $(MISCDIR)/, detectContacts.cpp)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, detectContacts.o) -c $(addprefix $(MISCDIR)/, detectContacts.cpp)
 
 # mains
 
@@ -235,6 +252,15 @@ $(addprefix $(OBJDIR)/, bestfitConverter.o): bestfitConverter.cpp
 
 $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o): performPCA2DCDtrajectory.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o) -c performPCA2DCDtrajectory.cpp
+
+$(addprefix $(OBJDIR)/, closestDNAIDSearch.o): closestDNAIDSearch.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, closestDNAIDSearch.o) -c closestDNAIDSearch.cpp
+
+$(addprefix $(OBJDIR)/, ContactMap.o): ContactMap.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, ContactMap.o) -c ContactMap.cpp
+
+$(addprefix $(OBJDIR)/, ContactRange.o): ContactRange.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, ContactRange.o) -c ContactRange.cpp
 
 $(addprefix $(OBJDIR)/, test.o): test.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, test.o) -c test.cpp
