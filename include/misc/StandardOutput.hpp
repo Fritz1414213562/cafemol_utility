@@ -32,7 +32,7 @@ public:
     }
 
     void output_HyphenBlock(const std::string& message, const std::size_t hyphen_num) {
-        const int iterate_num = (message.size() < hyphen_num) * hyphen_num + (message.size() >= hyphen_num) * message.size() - message.size();
+        const std::size_t iterate_num = (message.size() < hyphen_num) * hyphen_num + (message.size() >= hyphen_num) * message.size() - message.size();
         std::cout << "------" << message;
         for (std::size_t idx = 0; idx < iterate_num; ++idx) {
             std::cout << "-";
