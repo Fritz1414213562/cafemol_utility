@@ -2,14 +2,15 @@
 CC=g++
 #CC=/home/nagae/mygcc/bin/g++
 #CFLAGS= -std=c++17 -pedantic -Wall -g -v
-CFLAGS= -std=c++17 -pedantic -Wall -g 
-INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3
+CFLAGS= -std=c++17 -pedantic -Wall -g -O2
+INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3 -I/usr/local/include/opencv4
 
 # directory
 DCDDIR= ../include/DCD
 PDBDIR= ../include/PDB
 NINFODIR= ../include/NINFO
 PSFDIR= ../include/PSF
+OTHERFORMATDIR= ../include/OtherFormat
 MISCDIR= ../include/misc
 EXEDIR= ../bin
 OBJDIR= ./obj
@@ -39,7 +40,8 @@ SLIDE= $(addprefix $(OBJDIR)/, slideAnalyze.o FileOpenJudge.o DCDAnalyzer.o DCDP
 DCD2PDB= $(addprefix $(OBJDIR)/, makePDBfromDCD.o FileOpenJudge.o DCDReader.o DCDParser.o PDBWriter.o PDBParser.o)
 SEARCHNATIVE= $(addprefix $(OBJDIR)/, searchNativeContact.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PDBReader.o PDBParser.o)
 NCRANGE= $(addprefix $(OBJDIR)/, nativeContactedRange.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PDBReader.o PDBParser.o)
-HISTOGRAM= $(addprefix $(OBJDIR)/, convertHistData.o DensityFunction.o)
+#HISTOGRAM= $(addprefix $(OBJDIR)/, convertHistData.o DensityFunction.o)
+HISTOGRAM= $(addprefix $(OBJDIR)/, convertHistData.o)
 QSCORE= $(addprefix $(OBJDIR)/, calcQScore.o NinfoReader.o NinfoParser.o DCDAnalyzer.o DCDParser.o)
 SEARCHCONTACTHISTONE= $(addprefix $(OBJDIR)/, searchContactedHistoneChain.o FileOpenJudge.o DCDAnalyzer.o DCDParser.o PSFReader.o PSFParser.o)
 GETPDNS= $(addprefix $(OBJDIR)/, getProteinResiContacted2DNA.o FileOpenJudge.o NinfoReader.o NinfoParser.o PSFReader.o PSFParser.o PDBReader.o PDBParser.o)
@@ -59,6 +61,9 @@ PCA2DCD= $(addprefix $(OBJDIR)/, performPCA2DCDtrajectory.o DCDReader.o DCDParse
 CLOSESTDNAIDSEARCH= $(addprefix $(OBJDIR)/, closestDNAIDSearch.o DCDReader.o DCDParser.o PSFReader.o PSFParser.o detectContacts.o)
 CONTACTMAP= $(addprefix $(OBJDIR)/, ContactMap.o DCDReader.o DCDParser.o FileOpenJudge.o detectContacts.o)
 CONTACTRANGE= $(addprefix $(OBJDIR)/, ContactRange.o DCDReader.o DCDParser.o PSFReader.o PSFParser.o detectContacts.o)
+KMEANS4EMDCONTACT= $(addprefix $(OBJDIR)/, kmeansEMDClusteringStates.o)
+KMEANS4SSCONTACT= $(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o)
+DIVIDECLUSTEREDCS= $(addprefix $(OBJDIR)/, divideCSFromClustering.o)
 #TEST= $(addprefix $(OBJDIR)/, test.o DCDWriter.o DCDParser.o)
 TEST= $(addprefix $(OBJDIR)/, test.o DCDReader.o DCDParser.o)
 
@@ -132,6 +137,15 @@ contactmap: $(CONTACTMAP)
 contactrange: $(CONTACTRANGE)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, contactrange) $(CONTACTRANGE)
 
+kmeans4emdcontact: $(KMEANS4EMDCONTACT)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, kmeans4emdcontact) $(KMEANS4EMDCONTACT) -lopencv_core -lopencv_imgproc
+
+kmeans4sscontact: $(KMEANS4SSCONTACT)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, kmeans4sscontact) $(KMEANS4SSCONTACT) -lopencv_core -lopencv_imgproc
+
+divideclusteredcs: $(DIVIDECLUSTEREDCS)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, divideclusteredcs) $(DIVIDECLUSTEREDCS)
+
 # clean
 clean:
 	rm obj/*.o ../bin/*
@@ -174,14 +188,15 @@ $(addprefix $(OBJDIR)/, PSFParser.o): $(addprefix $(PSFDIR)/, PSFParser.cpp)
 $(addprefix $(OBJDIR)/, PSFReader.o): $(addprefix $(PSFDIR)/, PSFReader.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, PSFReader.o) -c $(addprefix $(PSFDIR)/, PSFReader.cpp)
 
+
 #$(addprefix $(OBJDIR)/, FileOpenJudge.o): FileOpenJudge.cpp
 #	$(CC) $(CFLAGS) $(INCLUDE) -c $(addprefix $(MISCDIR)/, FileOpenJudge.cpp)
 $(addprefix $(OBJDIR)/, FileOpenJudge.o): $(addprefix $(MISCDIR)/, FileOpenJudge.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, FileOpenJudge.o) -c $(addprefix $(MISCDIR)/, FileOpenJudge.cpp)
 
-$(addprefix $(OBJDIR)/, DensityFunction.o): $(addprefix $(MISCDIR)/, DensityFunction.cpp)
-	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, DensityFunction.o) -c $(addprefix $(MISCDIR)/, DensityFunction.cpp)
-
+#$(addprefix $(OBJDIR)/, DensityFunction.o): $(addprefix $(MISCDIR)/, DensityFunction.cpp)
+#	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, DensityFunction.o) -c $(addprefix $(MISCDIR)/, DensityFunction.cpp)
+#
 $(addprefix $(OBJDIR)/, BestFitFunction.o): $(addprefix $(MISCDIR)/, BestFitFunction.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, BestFitFunction.o) -c $(addprefix $(MISCDIR)/, BestFitFunction.cpp)
 
@@ -190,6 +205,7 @@ $(addprefix $(OBJDIR)/, PrincipalComponentAnalysis.o): $(addprefix $(MISCDIR)/, 
 
 $(addprefix $(OBJDIR)/, detectContacts.o): $(addprefix $(MISCDIR)/, detectContacts.cpp)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, detectContacts.o) -c $(addprefix $(MISCDIR)/, detectContacts.cpp)
+
 
 # mains
 
@@ -261,6 +277,15 @@ $(addprefix $(OBJDIR)/, ContactMap.o): ContactMap.cpp
 
 $(addprefix $(OBJDIR)/, ContactRange.o): ContactRange.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, ContactRange.o) -c ContactRange.cpp
+
+$(addprefix $(OBJDIR)/, kmeansEMDClusteringStates.o): kmeansEMDClusteringStates.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, kmeansEMDClusteringStates.o) -c kmeansEMDClusteringStates.cpp
+
+$(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o): kmeansSSClusteringStates.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o) -c kmeansSSClusteringStates.cpp
+
+$(addprefix $(OBJDIR)/, divideCSFromClustering.o): divideCSFromClustering.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, divideCSFromClustering.o) -c divideCSFromClustering.cpp
 
 $(addprefix $(OBJDIR)/, test.o): test.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, test.o) -c test.cpp
