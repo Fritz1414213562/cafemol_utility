@@ -3,11 +3,14 @@
 
 // public
 
-Eigen::Matrix<float, Eigen::Dynamic, 3> cafemol::library::Best_Fit_Performer::perform_EigenBestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+Eigen::Matrix<float, Eigen::Dynamic, 3> cafemol::analysis::Best_Fit_Performer::perform_EigenBestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+//Eigen::Matrix<float, Eigen::Dynamic, 3> cafemol::library::Best_Fit_Performer::perform_EigenBestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
 
 	// convert STL matrix to Eigen Matrix
 	Eigen::Matrix<float, Eigen::Dynamic, 3>&& ini_xyz_mat = cafemol::library::convert_2EigenMat(xyz_ref);
+//	Eigen::Matrix<float, Eigen::Dynamic, 3>&& ini_xyz_mat = cafemol::analysis::convert_2EigenMat(xyz_ref);
 	Eigen::Matrix<float, Eigen::Dynamic, 3>&& xyz_mat = cafemol::library::convert_2EigenMat(xyz_at_each_step);
+//	Eigen::Matrix<float, Eigen::Dynamic, 3>&& xyz_mat = cafemol::analysis::convert_2EigenMat(xyz_at_each_step);
 	
 	Eigen::Vector3f ini_xyz_centroid = ini_xyz_mat.colwise().sum() / ini_xyz_mat.rows();
 //	ini_xyz_mat.rowwise() -= ini_xyz_centroid;
@@ -62,7 +65,8 @@ Eigen::Matrix<float, Eigen::Dynamic, 3> cafemol::library::Best_Fit_Performer::pe
 
 // protected
 
-std::array<std::vector<float>, 3> cafemol::library::Best_Fit_Performer::perform_BestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+//std::array<std::vector<float>, 3> cafemol::library::Best_Fit_Performer::perform_BestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+std::array<std::vector<float>, 3> cafemol::analysis::Best_Fit_Performer::perform_BestFit(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
 
 	std::array<std::vector<float>, 3> xyz_target;
 	for (std::size_t idx = 0; idx < 3; ++idx) {
@@ -101,7 +105,8 @@ std::array<std::vector<float>, 3> cafemol::library::Best_Fit_Performer::perform_
 }
 
 
-Eigen::VectorXd cafemol::library::Best_Fit_Performer::perform_BestFit_ravel_Structure(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+//Eigen::VectorXd cafemol::library::Best_Fit_Performer::perform_BestFit_ravel_Structure(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+Eigen::VectorXd cafemol::analysis::Best_Fit_Performer::perform_BestFit_ravel_Structure(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
 
 	Eigen::VectorXd xyz_target(3 * xyz_at_each_step[0].size());
 //	std::cout << "Target trajectory size ->"
@@ -139,7 +144,8 @@ Eigen::VectorXd cafemol::library::Best_Fit_Performer::perform_BestFit_ravel_Stru
 // private
 
 
-std::array<float, 3> cafemol::library::Best_Fit_Performer::calc_CenterOfMass(const std::array<std::vector<float>, 3>& xyz) {
+//std::array<float, 3> cafemol::library::Best_Fit_Performer::calc_CenterOfMass(const std::array<std::vector<float>, 3>& xyz) {
+std::array<float, 3> cafemol::analysis::Best_Fit_Performer::calc_CenterOfMass(const std::array<std::vector<float>, 3>& xyz) {
 
 	std::array<float, 3> center_of_mass = {0.0, 0.0, 0.0};
 
@@ -154,7 +160,8 @@ std::array<float, 3> cafemol::library::Best_Fit_Performer::calc_CenterOfMass(con
 }
 
 
-Eigen::Matrix<float, 3, 3> cafemol::library::Best_Fit_Performer::calc_CrossCovarianceMatrix(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+//Eigen::Matrix<float, 3, 3> cafemol::library::Best_Fit_Performer::calc_CrossCovarianceMatrix(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
+Eigen::Matrix<float, 3, 3> cafemol::analysis::Best_Fit_Performer::calc_CrossCovarianceMatrix(const std::array<std::vector<float>, 3>& xyz_ref, const std::array<std::vector<float>, 3>& xyz_at_each_step) {
 
 	const std::array<float, 3> center_of_ref = calc_CenterOfMass(xyz_ref);
 	const std::array<float, 3> center_at_each_step = calc_CenterOfMass(xyz_at_each_step);
@@ -186,7 +193,8 @@ Eigen::Matrix<float, 3, 3> cafemol::library::Best_Fit_Performer::calc_CrossCovar
 }
 
 
-Eigen::Matrix<float, 3, 3> cafemol::library::Best_Fit_Performer::calc_BestFitRotationMatrix(const Eigen::Matrix<float, 3, 3>& covariance_matrix) {
+//Eigen::Matrix<float, 3, 3> cafemol::library::Best_Fit_Performer::calc_BestFitRotationMatrix(const Eigen::Matrix<float, 3, 3>& covariance_matrix) {
+Eigen::Matrix<float, 3, 3> cafemol::analysis::Best_Fit_Performer::calc_BestFitRotationMatrix(const Eigen::Matrix<float, 3, 3>& covariance_matrix) {
 	// perform SVD
 	Eigen::JacobiSVD<Eigen::Matrix<float, 3, 3>> SVD(covariance_matrix, Eigen::ComputeFullU | Eigen::ComputeFullV);
 	Eigen::Matrix<float, 3, 3> matrix_U = SVD.matrixU();

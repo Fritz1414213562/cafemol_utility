@@ -4,7 +4,8 @@
 // private
 
 
-std::array<std::vector<float>, 3> cafemol::library::PCA_Performer::calc_AverageStructure(const cafemol::Trajectories& traj) {
+std::array<std::vector<float>, 3> cafemol::analysis::PCA_Performer::calc_AverageStructure(const cafemol::Trajectory& traj) {
+//std::array<std::vector<float>, 3> cafemol::library::PCA_Performer::calc_AverageStructure(const cafemol::Trajectory& traj) {
 
 	std::array<std::vector<float>, 3> average_structure;
 	for (std::size_t idim = 0; idim < 3; ++idim) {
@@ -31,7 +32,8 @@ std::array<std::vector<float>, 3> cafemol::library::PCA_Performer::calc_AverageS
 }
 
 
-Eigen::VectorXd cafemol::library::PCA_Performer::convert_and_ravel_XYZStructure(const std::array<std::vector<float>, 3>& xyz) {
+Eigen::VectorXd cafemol::analysis::PCA_Performer::convert_and_ravel_XYZStructure(const std::array<std::vector<float>, 3>& xyz) {
+//Eigen::VectorXd cafemol::library::PCA_Performer::convert_and_ravel_XYZStructure(const std::array<std::vector<float>, 3>& xyz) {
 
 	if ((xyz[0].size() != xyz[1].size()) || (xyz[0].size() != xyz[2].size())) eout("The degree of freedom of xyz must be the same.");
 
@@ -67,7 +69,8 @@ Eigen::VectorXd cafemol::library::PCA_Performer::convert_and_ravel_XYZStructure(
 }
 
 
-Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cafemol::library::PCA_Performer::calc_CovarianceMatrix(const std::array<std::vector<float>, 3>& xyz) {
+Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cafemol::analysis::PCA_Performer::calc_CovarianceMatrix(const std::array<std::vector<float>, 3>& xyz) {
+//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cafemol::library::PCA_Performer::calc_CovarianceMatrix(const std::array<std::vector<float>, 3>& xyz) {
 
 
 	const std::size_t atom_number = xyz[0].size();
@@ -116,7 +119,8 @@ Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cafemol::library::PCA_Perf
 
 
 // You must ensure that each snapshot of the trajectory file have the same size among xyz directions.
-cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::Trajectories& traj, const std::size_t& max_component_num) {
+cafemol::PrincipalComponents cafemol::analysis::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::Trajectory& traj, const std::size_t& max_component_num) {
+//cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::Trajectory& traj, const std::size_t& max_component_num) {
 
 
 	const std::size_t& frame_number = traj.size();
@@ -193,7 +197,8 @@ cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalC
 
 }
 
-cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::EigenTrajectory& traj, const std::size_t& max_component_num) {
+cafemol::PrincipalComponents cafemol::analysis::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::EigenTrajectory& traj, const std::size_t& max_component_num) {
+//cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalComponentAnalysis(const cafemol::EigenTrajectory& traj, const std::size_t& max_component_num) {
 // for EigenTrajectory (You must ensure that the trajectory has been fit on the reference)
 
 	const std::size_t& atom_number = traj[0].size();
@@ -250,7 +255,8 @@ cafemol::PrincipalComponents cafemol::library::PCA_Performer::perform_PrincipalC
 }
 
 
-std::vector<double> cafemol::library::PCA_Performer::project_StructureOnPCs(const std::array<std::vector<float>, 3>& xyz, const std::vector<Eigen::VectorXd>& PC_axis) {
+std::vector<double> cafemol::analysis::PCA_Performer::project_StructureOnPCs(const std::array<std::vector<float>, 3>& xyz, const std::vector<Eigen::VectorXd>& PC_axis) {
+//std::vector<double> cafemol::library::PCA_Performer::project_StructureOnPCs(const std::array<std::vector<float>, 3>& xyz, const std::vector<Eigen::VectorXd>& PC_axis) {
 
 	std::vector<double> result(PC_axis.size(), 0);
 
@@ -284,7 +290,8 @@ std::vector<double> cafemol::library::PCA_Performer::project_StructureOnPCs(cons
 
 
 
-void cafemol::library::PCA_Performer::run(const cafemol::Trajectories& traj, const std::size_t& max_component_num) {
+void cafemol::analysis::PCA_Performer::run(const cafemol::Trajectory& traj, const std::size_t& max_component_num) {
+//void cafemol::library::PCA_Performer::run(const cafemol::Trajectory& traj, const std::size_t& max_component_num) {
 
 	// open or make output file
 	if (output_name.empty()) eout("You must initialize output file.");
@@ -300,7 +307,7 @@ void cafemol::library::PCA_Performer::run(const cafemol::Trajectories& traj, con
 	const std::size_t& frame_number = traj.size();
 
 	if (frame_number <= 1) eout("The frame size of a trajectory must be more than 1.");
-	sout("The frame size except the frame on the reference structure is " + std::to_string(frame_number) + ".",
+	sout("The frame size except the frame on the reference structure is " + std::to_string(frame_number - 1) + ".",
 		"");
 	const std::array<std::vector<float>, 3>& xyz_ref = traj[0];
 
@@ -315,16 +322,16 @@ void cafemol::library::PCA_Performer::run(const cafemol::Trajectories& traj, con
 
 	sout.output_HyphenBlock("output the result to " + output_name, BLOCK_SIZE);
 
-	ofs << "<<<< the number of principal components" << std::endl << pc_result.size() << std::endl;
+	ofs << "<<<< n_principal_components" << std::endl << pc_result.size() << std::endl;
 	ofs << ">>>>" << std::endl << std::endl;
 
-	ofs << "<<<< the contribution rates of principal components" << std::endl;
+	ofs << "<<<< contribution_rates" << std::endl;
 	for (std::size_t i_axis = 0; i_axis < pc_result.size(); ++i_axis) {
 		ofs << "PC" << i_axis + 1 << ": " << pc_result.contribution_rates(i_axis) << std::endl;
 	}
 	ofs << ">>>>" << std::endl << std::endl;
 
-	ofs << "<<<< the principal components vectors" << std::endl;
+	ofs << "<<<< principal_component_vectors" << std::endl;
 	ofs << "degree of freedom, PC1 vector, PC2 vector" << std::endl;
 	const std::size_t& pc_vec_size = pc_result.principal_component_axis[0].size();
 	for (std::size_t idx = 0; idx < pc_vec_size; ++idx) {
@@ -336,7 +343,7 @@ void cafemol::library::PCA_Performer::run(const cafemol::Trajectories& traj, con
 	}
 	ofs << ">>>>" << std::endl << std::endl;
 
-	ofs << "<<<< the structure projection on PC plane at each MD frame" << std::endl;
+	ofs << "<<<< projection_on_PCs" << std::endl;
 	ofs << "MD frame, PC1, PC2" << std::endl;
 	for (std::size_t iframe = 0; iframe < pc_result.projections.size(); ++iframe) {
 //		ofs << iframe + 1;

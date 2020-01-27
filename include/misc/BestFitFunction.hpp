@@ -11,7 +11,8 @@
 
 namespace cafemol {
 
-namespace library {
+//namespace library {
+namespace analysis {
 
 class Best_Fit_Performer {
 

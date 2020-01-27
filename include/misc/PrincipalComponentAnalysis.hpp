@@ -1,5 +1,6 @@
 #ifndef PRINCIPAL_COMPONENT_ANALYSIS_HPP
 #define PRINCIPAL_COMPONENT_ANALYSIS_HPP
+#include<CafemolName.hpp>
 #include<BestFitFunction.hpp>
 #include<ErrorMessage.hpp>
 #include<StandardOutput.hpp>
@@ -13,10 +14,8 @@
 
 namespace cafemol {
 
-using Trajectories = std::vector<std::array<std::vector<float>, 3>>;
-using EigenTrajectory = std::vector<Eigen::VectorXd>;
-
-namespace library {
+namespace analysis {
+//namespace library {
 
 
 struct PCA_Container {
@@ -53,7 +52,7 @@ public:
 
 	void set_CalculationStep(const std::size_t& calc_step) {calculate_step = calc_step;}
 
-	void run(const Trajectories& traj, const std::size_t& max_component_num);
+	void run(const Trajectory& traj, const std::size_t& max_component_num);
 //	void run(const EigenTrajectory& traj, const std::size_t& max_component_num);
 
 private:
@@ -73,13 +72,13 @@ private:
 
 	// private methods
 
-	std::array<std::vector<float>, 3> calc_AverageStructure(const Trajectories& traj);
+	std::array<std::vector<float>, 3> calc_AverageStructure(const Trajectory& traj);
 
 	Eigen::VectorXd convert_and_ravel_XYZStructure(const std::array<std::vector<float>, 3>& xyz);
 
 	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> calc_CovarianceMatrix(const std::array<std::vector<float>, 3>& xyz);
 
-	PCA_Container perform_PrincipalComponentAnalysis(const Trajectories& traj, const std::size_t& max_component_num);
+	PCA_Container perform_PrincipalComponentAnalysis(const Trajectory& traj, const std::size_t& max_component_num);
 	PCA_Container perform_PrincipalComponentAnalysis(const EigenTrajectory& traj, const std::size_t& max_component_num);
 
 	std::vector<double> project_StructureOnPCs(const std::array<std::vector<float>, 3>& xyz, const std::vector<Eigen::VectorXd>& PC_axis);
@@ -87,7 +86,8 @@ private:
 };
 }
 
-using PrincipalComponents = library::PCA_Container;
+using PrincipalComponents = analysis::PCA_Container;
+//using PrincipalComponents = library::PCA_Container;
 
 }
 
