@@ -28,6 +28,27 @@ std::vector<std::string> split_String(const std::string& line, const char& delim
 	return result;
 }
 
+std::vector<int> split_String2Int(const std::string& line, const char& delim) {
+
+	std::vector<int> result;
+	std::string buffer;
+
+	for (const char& Char : line) {
+		if ((Char == delim) && (buffer.empty())) continue;
+		else if ((Char == delim) && (!buffer.empty())) {
+			result.push_back(std::stoi(buffer));
+			buffer.clear();
+		}
+		else {
+			buffer.push_back(Char);
+		}
+	}
+	if (!buffer.empty()) {
+		result.push_back(std::stoi(buffer));
+	}
+	return result;
+}
+
 }
 }
 
