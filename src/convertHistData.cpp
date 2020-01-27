@@ -1,4 +1,4 @@
-#include"../include/misc/DensityFunction.hpp"
+#include<DensityFunction.hpp>
 #include<iostream>
 #include<string>
 #include<fstream>
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	float bin_range = stof(s_bin_num);
 
 	// generate the instance
-	std::unique_ptr<cafemol::DensityFunction> hist_drawer = std::make_unique<cafemol::DensityFunction>();
+	std::unique_ptr<cafemol::DensityFunction<float, float>> hist_drawer = std::make_unique<cafemol::DensityFunction<float, float>>();
 	// read the input file.
 	std::ifstream ifs(input_name, std::ios::in);
 	std::vector<float> bp_ids;
@@ -43,24 +43,28 @@ int main(int argc, char *argv[]) {
 		else break;
 	}
 	ifs.close();
-	std::sort(bp_ids.begin(), bp_ids.end());
 
 	// calculate the density of input vector.
 	if (is_set_data_range) hist_drawer->set_DataRange(data_range_left_lim, data_range_right_lim);
 	
-	std::array<std::vector<float>, 2> hist_xy_data = hist_drawer->make_Density(bp_ids, bin_range);
+	std::vector<cafemol::HistogramData<float, float>> hist_xy_data = hist_drawer->make_Density(bp_ids, bin_range);
+	const float& vector_size = static_cast<float>(bp_ids.size());
+
+	for (std::size_t idx = 0; idx < hist_xy_data.size(); ++idx) {
+		std::get<1>(hist_xy_data[idx]) /= vector_size;
+	}
 
 	// make output file
 	std::ofstream ofs(output_name, std::ios::out);
-	int hist_x_size = hist_xy_data[0].size();
-	int hist_y_size = hist_xy_data[1].size();
-	if (hist_x_size != hist_y_size) {
-		std::cerr << "Error: The data size of Histgram data in x-axis is not consistent with that in y-axis." << std::endl;
-		std::exit(1);
-	}
+//	int hist_x_size = hist_xy_data[0].size();
+//	int hist_y_size = hist_xy_data[1].size();
+//	if (hist_x_size != hist_y_size) {
+//		std::cerr << "Error: The data size of Histgram data in x-axis is not consistent with that in y-axis." << std::endl;
+//		std::exit(1);
+//	}
 
-	for (std::size_t idx = 0; idx < hist_x_size; ++idx) {
-		ofs << hist_xy_data[0][idx] << " " << hist_xy_data[1][idx] << std::endl;
+	for (std::size_t idx = 0; idx < hist_xy_data.size(); ++idx) {
+		ofs << std::get<0>(hist_xy_data[idx]) << " " << std::get<1>(hist_xy_data[idx]) << std::endl;
 	}
 
 	ofs.close();
