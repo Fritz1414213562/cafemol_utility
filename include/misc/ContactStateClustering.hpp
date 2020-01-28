@@ -27,13 +27,22 @@ namespace cafemol::analysis {
 
 enum KMeans_Frags {
 
-	// distance
-	KMF_DIST_EMD = 0,
-	KMF_DIST_SS = 1,
+// distance
+	// EMD
+	KMF_DIST_EMD,
 
-	// initialization
-	KMF_INI_DEFAULT = 0,
-	KMF_INI_PLUSPLUS = 1,
+	// Szymkiewicz-Simpson Similarity
+	KMF_DIST_SS,
+
+	// Dice Similarity
+	KMF_DIST_DS,
+
+	// Jaccard Similarity
+	KMF_DIST_JS,
+
+// initialization
+	KMF_INI_DEFAULT,
+	KMF_INI_PLUSPLUS,
 
 };
 
@@ -91,7 +100,7 @@ public:
 	// run
 
 
-	template<typename Size3_Vector, KMeans_Frags Ini_Frag>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag, KMeans_Frags Ini_Frag>
 	const std::tuple<std::vector<std::vector<std::size_t>>,
 					 std::vector<float>,
 					 std::vector<std::vector<float>>>
@@ -100,10 +109,10 @@ public:
 
 		sout("make initial cluster nuclears");
 
-		std::vector<std::vector<std::size_t>> clusters_indices = init_ClusterNuclear<Size3_Vector, Ini_Frag>(all_data);
-		sout("calculate initial centroids");
+		std::vector<std::vector<std::size_t>> clusters_indices = init_ClusterNuclear<Size3_Vector, Dist_Frag, Ini_Frag>(all_data);
+		sout("calculate initial centroids", "");
 		std::vector<std::vector<Size3_Vector>> centroids = calc_Centroids(all_data,
-														clusters_indices);
+																		  clusters_indices);
 		std::tuple<std::vector<std::vector<std::size_t>>,
 				   std::vector<float>,
 				   std::vector<std::vector<float>>> result;
@@ -120,17 +129,17 @@ public:
 
 
 		for (std::size_t i_update = 0; i_update < MAX_ITERATATION; ++i_update) {
-			const std::tuple<std::vector<std::vector<std::size_t>>, std::vector<float>>& clusters_indices_and_dist = classify_AllDataIntoClusters(all_data, centroids);
+			const std::tuple<std::vector<std::vector<std::size_t>>, std::vector<float>>& clusters_indices_and_dist = classify_AllDataIntoClusters<Size3_Vector, Dist_Frag>(all_data, centroids);
 			const std::vector<std::vector<Size3_Vector>>&
 			updated_centroids = calc_Centroids(all_data, std::get<0>(clusters_indices_and_dist));
-			const std::vector<float>& centroids_dist = measure_CentroidDistance(centroids, updated_centroids);
+			const std::vector<float>& centroids_dist = measure_CentroidDistance<Size3_Vector, Dist_Frag>(centroids, updated_centroids);
 		//	if (is_similar20vec<Size3_Vector>(centroids_dist)) {
 			if (is_similar20vec(centroids_dist)) {
 				std::get<0>(result) = std::get<0>(clusters_indices_and_dist);
 				std::get<1>(result) = std::get<1>(clusters_indices_and_dist);
 				for (std::size_t i_cluster = 0; i_cluster < n_cluster - 1; ++i_cluster) {
 					for (std::size_t j_cluster = i_cluster; j_cluster < n_cluster; ++j_cluster) {
-						const float& diff_centroids = calc_DataDistance(updated_centroids[i_cluster], updated_centroids[j_cluster]);
+						const float& diff_centroids = calc_DataDistance<Size3_Vector, Dist_Frag>(updated_centroids[i_cluster], updated_centroids[j_cluster]);
 						if (i_cluster != j_cluster) {
 							std::get<2>(result)[i_cluster][j_cluster] = diff_centroids;
 							std::get<2>(result)[j_cluster][i_cluster] = diff_centroids;
@@ -138,7 +147,7 @@ public:
 						else std::get<2>(result)[i_cluster][j_cluster] = diff_centroids;
 					}
 					if (i_cluster == n_cluster - 2) {
-						const float& diff_centroids = calc_DataDistance(updated_centroids[n_cluster - 1], updated_centroids[n_cluster - 1]);
+						const float& diff_centroids = calc_DataDistance<Size3_Vector, Dist_Frag>(updated_centroids[n_cluster - 1], updated_centroids[n_cluster - 1]);
 						std::get<2>(result)[n_cluster - 1][n_cluster - 1] = diff_centroids;
 					}
 				}
@@ -275,7 +284,7 @@ private:
 	}
 
 
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::tuple<std::vector<std::vector<std::size_t>>, std::vector<float>>
 	classify_AllDataIntoClusters(const std::vector<std::vector<Size3_Vector>>& all_data, 
 	const std::vector<std::vector<Size3_Vector>>& centroids) {
@@ -288,7 +297,7 @@ private:
 
 		for (std::size_t data_index = 0; data_index < all_data.size(); ++data_index) {
 			const std::vector<Size3_Vector>& frame = all_data[data_index];
-			const std::tuple<std::size_t, float>& cluster_id_and_dist = calc_ClusterIDAndDistFromCentroid(frame, centroids);
+			const std::tuple<std::size_t, float>& cluster_id_and_dist = calc_ClusterIDAndDistFromCentroid<Size3_Vector, Dist_Frag>(frame, centroids);
 			std::get<0>(result)[std::get<0>(cluster_id_and_dist)].push_back(data_index);
 //			if (intracluster_dist[std::get<0>(cluster_id_and_dist)] < std::get<1>(cluster_id_and_dist)) {
 //				intracluster_dist[std::get<0>(cluster_id_and_dist)] = std::get<1>(cluster_id_and_dist);
@@ -305,7 +314,7 @@ private:
 
 
 
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::vector<float>
 	measure_CentroidDistance(const std::vector<std::vector<Size3_Vector>>& new_centroids, const std::vector<std::vector<Size3_Vector>>& old_centroids) {
 	
@@ -314,7 +323,7 @@ private:
 		for (std::size_t i_cluster = 0; i_cluster < n_cluster; ++i_cluster) {
 			const std::vector<Size3_Vector>& new_centroid = new_centroids[i_cluster];
 			const std::vector<Size3_Vector>& old_centroid = old_centroids[i_cluster];
-			const float& distance_between_new_old = calc_DataDistance(new_centroid, old_centroid);
+			const float& distance_between_new_old = calc_DataDistance<Size3_Vector, Dist_Frag>(new_centroid, old_centroid);
 			result[i_cluster] = distance_between_new_old;
 		}
 		return result;
@@ -322,17 +331,22 @@ private:
 
 
 
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag, KMeans_Frags Ini_Frag>
+	const std::vector<std::vector<std::size_t>> init_ClusterNuclear(const std::vector<std::vector<Size3_Vector>>& all_data);
+
+
+	
 	template<typename Size3_Vector, KMeans_Frags Ini_Frag>
 	const std::vector<std::vector<std::size_t>> init_ClusterNuclear(const std::vector<std::vector<Size3_Vector>>& all_data);
 
 
 	
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const float calc_DataDistance(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs);
 
 
 
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::tuple<std::size_t, float>
 	calc_ClusterIDAndDistFromCentroid(const std::vector<Size3_Vector>& frame, const std::vector<std::vector<Size3_Vector>>& centroids);
 
@@ -361,7 +375,7 @@ private:
 
 	// using ++method (just choosing one cluster nuclear randomly, but others are chosen by the distance)
 
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::vector<std::vector<std::size_t>> choose_DistantIndices(const std::vector<std::vector<Size3_Vector>>& all_data) {
 
 		std::mt19937_64 mt_engine_for_uniform_dist(random_seed);
@@ -379,7 +393,7 @@ private:
 			for (const std::vector<Size3_Vector>& datum : all_data) {
 				double dist = 0.0;
 				for (std::size_t j_cluster = 0; j_cluster < i_cluster; ++j_cluster) {
-					const float& data_dist_between_j_datum = calc_DataDistance(datum, all_data[result[j_cluster][0]]);
+					const float& data_dist_between_j_datum = calc_DataDistance<Size3_Vector, Dist_Frag>(datum, all_data[result[j_cluster][0]]);
 					dist += static_cast<double>(data_dist_between_j_datum);
 					total_dist += static_cast<double>(data_dist_between_j_datum);
 				}
@@ -433,20 +447,24 @@ private:
 	}
 
 
+
+
+
 	// Szymkiewicz-Simpson coefficient
 
 
-	const float calc_SimpsonSimilariy(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {
+	template<typename Size3_Vector>
+	const float calc_SimpsonSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
 
 		float elem_contrib_sum = 0.0;
 		const float& lhs_total_elem_size = calc_TotalElementSize(lhs);
 		const float& rhs_total_elem_size = calc_TotalElementSize(rhs);
 		const float& smaller_total_elem_size = std::min(lhs_total_elem_size, rhs_total_elem_size);
 
-		for (const std::array<float, 3>& lhs_elem : lhs) {
+		for (const Size3_Vector& lhs_elem : lhs) {
 			bool is_same_elem = false;
 			std::size_t same_elem_index = 0;
-			for (const std::array<float, 3>& rhs_elem : rhs) {
+			for (const Size3_Vector& rhs_elem : rhs) {
 				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
 												rhs_elem[0], rhs_elem[1]);
 				if (is_same_elem) break;
@@ -460,20 +478,79 @@ private:
 
 
 
+
+	// Jaccard Index
+
+
+	template<typename Size3_Vector>
+	const float calc_DiceSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
+
+		float elem_contrib_sum = 0.0;
+		const float& total_contrib_size = calc_TotalElementSize(lhs) + calc_TotalElementSize(rhs);
+
+		for (const Size3_Vector& lhs_elem : lhs) {
+			bool is_same_elem = false;
+			std::size_t same_elem_index = 0;
+			for (const Size3_Vector& rhs_elem : rhs) {
+				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
+												rhs_elem[0], rhs_elem[1]);
+				if (is_same_elem) break;
+				++same_elem_index;
+			}
+			if (is_same_elem) elem_contrib_sum += std::min(lhs_elem[2], rhs[same_elem_index][2]);
+		}
+
+		return 1.0 - (2.0 * elem_contrib_sum / total_contrib_size);
+	}
+
+
+
+
+	// Jaccard Index
+
+
+	template<typename Size3_Vector>
+	const float calc_JaccardSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
+
+		float elem_contrib_sum = 0.0;
+		const float& total_contrib_size = calc_TotalElementSize(lhs) + calc_TotalElementSize(rhs);
+
+		for (const Size3_Vector& lhs_elem : lhs) {
+			bool is_same_elem = false;
+			std::size_t same_elem_index = 0;
+			for (const Size3_Vector& rhs_elem : rhs) {
+				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
+												rhs_elem[0], rhs_elem[1]);
+				if (is_same_elem) break;
+				++same_elem_index;
+			}
+			if (is_same_elem) elem_contrib_sum += std::min(lhs_elem[2], rhs[same_elem_index][2]);
+		}
+
+		const float& union_contrib_size = total_contrib_size - elem_contrib_sum;
+
+		return 1.0 - (elem_contrib_sum / union_contrib_size);
+	}
+
+
+
+
+
+
 // -------------------------------------------------------------------------------------------
 // Data Classification Methods
 
 
 	// using the real distance between frame and centroids
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::tuple<std::size_t, float> 
 	calc_ClosestCentroidIDAndDist(const std::vector<Size3_Vector>& frame, const std::vector<std::vector<Size3_Vector>>& centroids) {
 	
 		const std::vector<Size3_Vector>& centroid_index0 = centroids[0];
-		float min_data_distance = calc_DataDistance(frame, centroid_index0);
+		float min_data_distance = calc_DataDistance<Size3_Vector, Dist_Frag>(frame, centroid_index0);
 		std::tuple<std::size_t, float> result = std::make_tuple(0, min_data_distance);
 		for (std::size_t i_cluster = 1; i_cluster < n_cluster; ++i_cluster) {
-			float data_distance = calc_DataDistance(frame, centroids[i_cluster]);
+			float data_distance = calc_DataDistance<Size3_Vector, Dist_Frag>(frame, centroids[i_cluster]);
 			if (data_distance < min_data_distance) {
 				min_data_distance = data_distance;
 				std::get<0>(result) = i_cluster;
@@ -486,15 +563,15 @@ private:
 
 	// using the similarity between frame and centroids
 
-	template<typename Size3_Vector>
+	template<typename Size3_Vector, KMeans_Frags Dist_Frag>
 	const std::tuple<std::size_t, float>
 	calc_MostSimilarCentroidIDAndDist(const std::vector<Size3_Vector>& frame, const std::vector<std::vector<Size3_Vector>>& centroids) {
 
 		const std::vector<Size3_Vector>& centroid_index0 = centroids[0];
-		float min_data_similarity = calc_DataDistance(frame, centroid_index0);
+		float min_data_similarity = calc_DataDistance<Size3_Vector, Dist_Frag>(frame, centroid_index0);
 		std::tuple<std::size_t, float> result = std::make_tuple(0, min_data_similarity);
 		for (std::size_t i_cluster = 1; i_cluster < n_cluster; ++i_cluster) {
-			float data_similarity = calc_DataDistance(frame, centroids[i_cluster]);
+			float data_similarity = calc_DataDistance<Size3_Vector, Dist_Frag>(frame, centroids[i_cluster]);
 			if (data_similarity < min_data_similarity) {
 				min_data_similarity = data_similarity;
 				std::get<0>(result) = i_cluster;
@@ -526,39 +603,108 @@ private:
 
 // initialization of the nuclear of clusters
 
-template<>
-const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_INI_DEFAULT>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_TotalyRandomIndices(all_data.size());}
-
-
+// totaly random
 
 template<>
-const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_INI_DEFAULT>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_TotalyRandomIndices(all_data.size());}
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_INI_DEFAULT>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_TotalyRandomIndices(all_data.size());}
 
 
 
 template<>
-const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_DistantIndices(all_data);}
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_INI_DEFAULT>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_TotalyRandomIndices(all_data.size());}
+
+
+
+// efficient sampling
+
+	// EMD
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_DistantIndices<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(all_data);}
+
+
+	// SS
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_DIST_SS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_DistantIndices<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(all_data);}
 
 
 
 template<>
-const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_DistantIndices(all_data);}
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_DistantIndices<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(all_data);}
+
+
+
+
+	// JS
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_DIST_JS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_DistantIndices<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(all_data);}
+
+
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_DistantIndices<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(all_data);}
 
 
 
 
 
-// measuring the distance between old centroids and new ones
+	// DS
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<cv::Vec3f, cafemol::analysis::KMF_DIST_DS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<cv::Vec3f>>& all_data) {return choose_DistantIndices<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(all_data);}
+
+
+
+template<>
+inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_ClusterNuclear<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS, cafemol::analysis::KMF_INI_PLUSPLUS>(const std::vector<std::vector<std::array<float, 3>>>& all_data) {return choose_DistantIndices<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(all_data);}
+
+
+
+
+
+
+// measuring the distance among data
 
 
 	// using EMD
 template<>
-inline const float ContactStateClustering::calc_DataDistance(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_EarthMoversDistance(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_EarthMoversDistance(lhs, rhs);}
 
 
 	// using SS
 template<>
-inline const float ContactStateClustering::calc_DataDistance(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_SimpsonSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_SimpsonSimilariy(lhs, rhs);}
+
+
+
+template<>
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_SimpsonSimilariy(lhs, rhs);}
+
+
+
+	// using JS
+template<>
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+
+
+
+template<>
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+
+
+
+
+
+	// using DS
+template<>
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+
+
+
+template<>
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
 
 
 
@@ -567,14 +713,44 @@ inline const float ContactStateClustering::calc_DataDistance(const std::vector<s
 // searching the closest centroid
 	// using real distance
 template<>
-inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid(const std::vector<cv::Vec3f>& frame, const std::vector<std::vector<cv::Vec3f>>& centroids) {
-	return calc_ClosestCentroidIDAndDist(frame, centroids);
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(const std::vector<cv::Vec3f>& frame, const std::vector<std::vector<cv::Vec3f>>& centroids) {
+	return calc_ClosestCentroidIDAndDist<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(frame, centroids);
 }
 
 
-	// using similarity
+	// using simpson similarity
 template<>
-inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid(const std::vector<std::array<float, 3>>& frame, const std::vector<std::vector<std::array<float, 3>>>& centroids) {return calc_MostSimilarCentroidIDAndDist(frame, centroids);}
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(const std::vector<std::array<float, 3>>& frame, const std::vector<std::vector<std::array<float, 3>>>& centroids) {return calc_MostSimilarCentroidIDAndDist<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(frame, centroids);}
+
+
+template<>
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(const std::vector<cv::Vec3f>& frame, const std::vector<std::vector<cv::Vec3f>>& centroids) {return calc_MostSimilarCentroidIDAndDist<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(frame, centroids);}
+
+
+
+	// using jaccard similarity
+
+template<>
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(const std::vector<std::array<float, 3>>& frame, const std::vector<std::vector<std::array<float, 3>>>& centroids) {return calc_MostSimilarCentroidIDAndDist<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(frame, centroids);}
+
+
+template<>
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(const std::vector<cv::Vec3f>& frame, const std::vector<std::vector<cv::Vec3f>>& centroids) {return calc_MostSimilarCentroidIDAndDist<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(frame, centroids);}
+
+
+
+
+
+	// using dice similarity
+
+template<>
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(const std::vector<std::array<float, 3>>& frame, const std::vector<std::vector<std::array<float, 3>>>& centroids) {return calc_MostSimilarCentroidIDAndDist<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(frame, centroids);}
+
+
+template<>
+inline const std::tuple<std::size_t, float> ContactStateClustering::calc_ClusterIDAndDistFromCentroid<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(const std::vector<cv::Vec3f>& frame, const std::vector<std::vector<cv::Vec3f>>& centroids) {return calc_MostSimilarCentroidIDAndDist<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(frame, centroids);}
+
+
 
 
 
