@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 	std::ifstream skip_file(skip_filename, std::ios::in);
 	std::vector<std::size_t> skip_number;
 	if (skip_file.is_open()) {
+		sout("The file, SkipNum has read.");
 		std::string buffer;
 		while (std::getline(skip_file, buffer)) {
 			skip_number.push_back(std::stoi(buffer));
@@ -64,6 +65,9 @@ int main(int argc, char *argv[]) {
 	std::vector<std::vector<std::array<float, 3>>> all_frames;
 
 	sout.output_HyphenBlock("", BLOCK_SIZE);
+
+	sout("Calculation starts.", "");
+
 	sout("Reading Contact State Data");
 	
 
@@ -72,7 +76,10 @@ int main(int argc, char *argv[]) {
 		for (std::size_t skip_idx = 0; skip_idx < skip_number.size(); ++skip_idx) {
 			is_skipped = (is_skipped || (skip_number[skip_idx] == file_index));
 		}
-		if (is_skipped) continue;
+		if (is_skipped) {
+			sout("File Index " + std::to_string(file_index) + " skipped.");
+			continue;
+		}
 
 		std::stringstream buffer_filename;
 		buffer_filename << input_prefix
@@ -84,8 +91,9 @@ int main(int argc, char *argv[]) {
 		contact_state_reader->read_ContactStatesWOIni(all_frames, input_name);
 	}
 
-	cafemol::ClusteringResults clustering_result = analyzer->run<std::array<float, 3>, cafemol::analysis::KMF_INI_PLUSPLUS>(all_frames);
+	cafemol::ClusteringResults clustering_result = analyzer->run<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS, cafemol::analysis::KMF_INI_PLUSPLUS>(all_frames);
 //	cafemol::ClusteringResults clustering_result = analyzer->run<std::array<float, 3>, cafemol::analysis::KMF_INI_DEFAULT>(all_frames);
+	sout("", "Calculation ends.");
 
 	sout.output_HyphenBlock("", BLOCK_SIZE);
 	sout("Output results to " + output_name);
@@ -157,6 +165,8 @@ int main(int argc, char *argv[]) {
 	double measured_time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000000.);
 
 	std::cout << "Measured Time: " << measured_time << " [s]" << std::endl;
+
+
 
 	return 0;
 }
