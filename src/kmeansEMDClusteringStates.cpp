@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 		contact_state_reader->read_ContactStatesWOIni(all_frames, input_name);
 	}
 
-	cafemol::ClusteringResults clustering_result = analyzer->run(all_frames);
+	cafemol::ClusteringResults clustering_result = analyzer->run<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD, cafemol::analysis::KMF_INI_PLUSPLUS>(all_frames);
 
 	sout.output_HyphenBlock("", BLOCK_SIZE);
 	sout("Output results to " + output_name);

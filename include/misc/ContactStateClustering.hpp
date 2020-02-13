@@ -3,7 +3,10 @@
 #include<ErrorMessage.hpp>
 #include<StandardOutput.hpp>
 #include<opencv2/core.hpp>
-#include<opencv2/imgproc.hpp>
+//#include<opencv2/imgproc.hpp>
+#include<SetSimilarityCalculation.hpp>
+#include<SetDistanceCalculation.hpp>
+#include<UtilFunc.hpp>
 #include<random>
 #include<iostream>
 #include<string>
@@ -134,7 +137,7 @@ public:
 			updated_centroids = calc_Centroids(all_data, std::get<0>(clusters_indices_and_dist));
 			const std::vector<float>& centroids_dist = measure_CentroidDistance<Size3_Vector, Dist_Frag>(centroids, updated_centroids);
 		//	if (is_similar20vec<Size3_Vector>(centroids_dist)) {
-			if (is_similar20vec(centroids_dist)) {
+			if (cafemol::library::is_similar20vec(centroids_dist, cutoff_similarity)) {
 				std::get<0>(result) = std::get<0>(clusters_indices_and_dist);
 				std::get<1>(result) = std::get<1>(clusters_indices_and_dist);
 				for (std::size_t i_cluster = 0; i_cluster < n_cluster - 1; ++i_cluster) {
@@ -192,61 +195,6 @@ private:
 
 
 
-	bool is_on_same_pixel(const float& lhs_x, const float& lhs_y, const float& rhs_x, const float& rhs_y) {
-		return ((((lhs_x - bin_width / 2) <= rhs_x) && (rhs_x < (lhs_x + bin_width / 2))) && 
-			   (((lhs_y - bin_width / 2) <= rhs_y) && (rhs_y < (lhs_y + bin_width / 2))));
-	}
-
-
-
-//template<typename Size3_Vector>
-//	bool is_similar20vec(const std::vector<float>& vec);
-
-	bool is_similar20vec(const std::vector<float>& vec) {
-		bool result = true;
-	
-		for (const float& component : vec) {
-			result = (result && (component <= cutoff_similarity));
-		}
-		return result;
-	}
-
-
-
-	
-	template<typename Size3_Vector>
-	const float calc_TotalElementSize(const std::vector<Size3_Vector>& vec) {
-		float result = 0.0;
-		for (const Size3_Vector& vec_elem : vec) {
-			result += vec_elem[2];
-		}
-		return result;
-	}
-
-
-
-	template<typename Size3_Vector>
-	void overlie_Data(std::vector<Size3_Vector>& overlain_data, const std::vector<Size3_Vector>& input_data) {
-		for (const Size3_Vector& input_datum : input_data) {
-			bool is_overlain = false;
-			std::size_t overlain_index = 0;
-			for (Size3_Vector& overlain_datum : overlain_data) {
-				if (is_on_same_pixel(input_datum[0], input_datum[1],
-									 overlain_datum[0], overlain_datum[1])) {
-					is_overlain = true;
-					break;
-				}
-				++overlain_index;
-			}
-			if (is_overlain) overlain_data[overlain_index][2] += input_datum[2];
-			else overlain_data.push_back(input_datum);
-		}
-	}
-
-
-
-
-
 	// check whether the cluster size is 0 before using this method
 	template<typename Size3_Vector>
 	const std::vector<Size3_Vector> calc_ClusterCentroid(const std::vector<std::vector<Size3_Vector>>& all_data, const std::vector<std::size_t>& indices_in_a_cluster) {
@@ -256,7 +204,7 @@ private:
 
 		for (std::size_t idx = 1; idx < cluster_size; ++idx) {
 			const std::size_t& index_in_a_cluster = indices_in_a_cluster[idx];
-			overlie_Data(result, all_data[index_in_a_cluster]);
+			cafemol::library::overlie_Data(result, all_data[index_in_a_cluster], bin_width);
 		}
 
 		const std::size_t& data_size = result.size();
@@ -429,110 +377,28 @@ private:
 
 
 
-	// EMD
-	const float calc_EarthMoversDistance(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {
-		const cv::Mat& lhs_mat = cv::Mat(lhs).clone().reshape(1);
-		const cv::Mat& rhs_mat = cv::Mat(rhs).clone().reshape(1);
-	//	float result = 0.0;
-		// for asymmetrical size
-	//	if (lhs.size() != rhs.size()) {
-	//		const float& dist_lhs_rhs = cv::EMD(lhs_mat, rhs_mat, cv::DIST_L2);
-	//		const float& dist_rhs_lhs = cv::EMD(rhs_mat, lhs_mat, cv::DIST_L2);
-	//		result = (dist_lhs_rhs + dist_rhs_lhs) / 2;
-	//	}
-	//	else result = cv::EMD(lhs_mat, rhs_mat, cv::DIST_L2);
-		float result = cv::EMD(lhs_mat, rhs_mat, cv::DIST_L2);
-
-		return result;
-	}
-
-
-
 
 
 	// Szymkiewicz-Simpson coefficient
 
-
 	template<typename Size3_Vector>
-	const float calc_SimpsonSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
-
-		float elem_contrib_sum = 0.0;
-		const float& lhs_total_elem_size = calc_TotalElementSize(lhs);
-		const float& rhs_total_elem_size = calc_TotalElementSize(rhs);
-		const float& smaller_total_elem_size = std::min(lhs_total_elem_size, rhs_total_elem_size);
-
-		for (const Size3_Vector& lhs_elem : lhs) {
-			bool is_same_elem = false;
-			std::size_t same_elem_index = 0;
-			for (const Size3_Vector& rhs_elem : rhs) {
-				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
-												rhs_elem[0], rhs_elem[1]);
-				if (is_same_elem) break;
-				++same_elem_index;
-			}
-			if (is_same_elem) elem_contrib_sum += std::min(lhs_elem[2], rhs[same_elem_index][2]);
-		}
-
-		return 1.0 - (elem_contrib_sum / smaller_total_elem_size);
+	const float calculate_SimpsonSimilarity(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
+		return cafemol::library::calc_SimpsonSimilarity(lhs, rhs, bin_width);
 	}
 
+	// Dice Index
 
-
+	template<typename Size3_Vector>
+	const float calculate_DiceSimilarity(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
+		return cafemol::library::calc_DiceSimilarity(lhs, rhs, bin_width);
+	}
 
 	// Jaccard Index
 
-
 	template<typename Size3_Vector>
-	const float calc_DiceSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
-
-		float elem_contrib_sum = 0.0;
-		const float& total_contrib_size = calc_TotalElementSize(lhs) + calc_TotalElementSize(rhs);
-
-		for (const Size3_Vector& lhs_elem : lhs) {
-			bool is_same_elem = false;
-			std::size_t same_elem_index = 0;
-			for (const Size3_Vector& rhs_elem : rhs) {
-				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
-												rhs_elem[0], rhs_elem[1]);
-				if (is_same_elem) break;
-				++same_elem_index;
-			}
-			if (is_same_elem) elem_contrib_sum += std::min(lhs_elem[2], rhs[same_elem_index][2]);
-		}
-
-		return 1.0 - (2.0 * elem_contrib_sum / total_contrib_size);
+	const float calculate_JaccardSimilarity(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
+		return cafemol::library::calc_JaccardSimilarity(lhs, rhs, bin_width);
 	}
-
-
-
-
-	// Jaccard Index
-
-
-	template<typename Size3_Vector>
-	const float calc_JaccardSimilariy(const std::vector<Size3_Vector>& lhs, const std::vector<Size3_Vector>& rhs) {
-
-		float elem_contrib_sum = 0.0;
-		const float& total_contrib_size = calc_TotalElementSize(lhs) + calc_TotalElementSize(rhs);
-
-		for (const Size3_Vector& lhs_elem : lhs) {
-			bool is_same_elem = false;
-			std::size_t same_elem_index = 0;
-			for (const Size3_Vector& rhs_elem : rhs) {
-				is_same_elem = is_on_same_pixel(lhs_elem[0], lhs_elem[1],
-												rhs_elem[0], rhs_elem[1]);
-				if (is_same_elem) break;
-				++same_elem_index;
-			}
-			if (is_same_elem) elem_contrib_sum += std::min(lhs_elem[2], rhs[same_elem_index][2]);
-		}
-
-		const float& union_contrib_size = total_contrib_size - elem_contrib_sum;
-
-		return 1.0 - (elem_contrib_sum / union_contrib_size);
-	}
-
-
 
 
 
@@ -670,28 +536,32 @@ inline const std::vector<std::vector<std::size_t>> ContactStateClustering::init_
 
 	// using EMD
 template<>
-inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_EarthMoversDistance(lhs, rhs);}
+inline const float
+ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_EMD>(
+const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {
+	return cafemol::library::calc_EarthMoversDistance(lhs, rhs);
+}
 
 
 	// using SS
 template<>
-inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_SimpsonSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_SS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calculate_SimpsonSimilarity(lhs, rhs);}
 
 
 
 template<>
-inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_SimpsonSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_SS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calculate_SimpsonSimilarity(lhs, rhs);}
 
 
 
 	// using JS
 template<>
-inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_JS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calculate_JaccardSimilarity(lhs, rhs);}
 
 
 
 template<>
-inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_JS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calculate_JaccardSimilarity(lhs, rhs);}
 
 
 
@@ -699,12 +569,12 @@ inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3
 
 	// using DS
 template<>
-inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<cv::Vec3f, cafemol::analysis::KMF_DIST_DS>(const std::vector<cv::Vec3f>& lhs, const std::vector<cv::Vec3f>& rhs) {return calculate_DiceSimilarity(lhs, rhs);}
 
 
 
 template<>
-inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calc_JaccardSimilariy(lhs, rhs);}
+inline const float ContactStateClustering::calc_DataDistance<std::array<float, 3>, cafemol::analysis::KMF_DIST_DS>(const std::vector<std::array<float, 3>>& lhs, const std::vector<std::array<float, 3>>& rhs) {return calculate_DiceSimilarity(lhs, rhs);}
 
 
 
@@ -754,30 +624,6 @@ inline const std::tuple<std::size_t, float> ContactStateClustering::calc_Cluster
 
 
 
-//template<>
-//bool ContactStateClustering::is_similar20vec<cv::Vec3f>(const std::vector<float>& vec) {
-//	bool result = true;
-//
-//	for (const float& component : vec) {
-//		result = (result && (component <= cutoff_similarity));
-//	}
-//	return result;
-//}
-//
-//
-//template<>
-//bool ContactStateClustering::is_similar20vec<std::array<float, 3>>(const std::vector<float>& vec) {
-//	bool result = true;
-//
-//	for (const float& component : vec) {
-//		result = (result && (component >= cutoff_similarity));
-//	}
-//	return result;
-//}
-//
-//
-//	
-//
 
 
 // terminate the namespace cafemol::analysis

@@ -1,6 +1,6 @@
 #ifndef CONTACT_STATE_PARSER_HPP
 #define CONTACT_STATE_PARSER_HPP
-#include<ErrorMessage.hpp>
+#include<IO/ErrorMessage.hpp>
 #include<UtilFunc.hpp>
 #include<iostream>
 #include<fstream>
@@ -29,13 +29,14 @@ public:
 
 protected:
 
-	cafemol::error_handling::Error_Output eout = cafemol::error_handling::Error_Output();
+//	cafemol::error_handling::Error_Output eout = cafemol::error_handling::Error_Output();
+	CafeInLess::IO::Error_Output eout = CafeInLess::IO::Error_Output();
 	std::ifstream input_file;
 
 	void open_File() {
 		close_File();
 		input_file.open(input_name);
-		if (!input_file.is_open()) eout("The file, " + input_name + " could not be found.");
+		if (!input_file.is_open()) eout("The file,", input_name, "could not be found.");
 	}
 
 	std::vector<std::string> split_ConLine(const std::string& line) {

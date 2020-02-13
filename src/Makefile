@@ -1,9 +1,16 @@
 # compiler
 CC=g++
 #CC=/home/nagae/mygcc/bin/g++
+# for velox
+#CC=/home/nagae/local/bin/g++
 #CFLAGS= -std=c++17 -pedantic -Wall -g -v
+#CFLAGS= -std=c++17 -pedantic -Wall -g -O2 -v
 CFLAGS= -std=c++17 -pedantic -Wall -g -O2
-INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3 -I/usr/local/include/opencv4
+#INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3 -I/usr/local/include/opencv4
+INCLUDE= -I. -I../include -I../include/misc -I/usr/local/include/eigen3 -I/usr/local/include/opencv4 -I/home/nagae/CafeInLess/include
+
+# for velox
+#INCLUDE= -I. -I../include -I../include/misc -I/home/nagae/local_env/include/opencv4
 
 # directory
 DCDDIR= ../include/DCD
@@ -63,7 +70,18 @@ CONTACTMAP= $(addprefix $(OBJDIR)/, ContactMap.o DCDReader.o DCDParser.o FileOpe
 CONTACTRANGE= $(addprefix $(OBJDIR)/, ContactRange.o DCDReader.o DCDParser.o PSFReader.o PSFParser.o detectContacts.o)
 KMEANS4EMDCONTACT= $(addprefix $(OBJDIR)/, kmeansEMDClusteringStates.o)
 KMEANS4SSCONTACT= $(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o)
+KMEANS4JSCONTACT= $(addprefix $(OBJDIR)/, kmeansJSClusteringStates.o)
+KMEANS4DSCONTACT= $(addprefix $(OBJDIR)/, kmeansDSClusteringStates.o)
 DIVIDECLUSTEREDCS= $(addprefix $(OBJDIR)/, divideCSFromClustering.o)
+GENERATEDUMMYDATA= $(addprefix $(OBJDIR)/, generateDummyData4kmeans.o)
+CALCGAPSTATISTIC= $(addprefix $(OBJDIR)/, calcGapStatistic.o)
+S_DENSBW= $(addprefix $(OBJDIR)/, S_Dbw.o)
+COUNTCONTACTS= $(addprefix $(OBJDIR)/, countContacts.o)
+MAKECONTACTPROB= $(addprefix $(OBJDIR)/, makeContactProb.o)
+HISTOGRAMIGNORENAN= $(addprefix $(OBJDIR)/, HistogramIgnoreNaN.o)
+DIVIDECONTACTSTATE= $(addprefix $(OBJDIR)/, divideContactState.o)
+CALCDNAHISCONTACTPROB= $(addprefix $(OBJDIR)/, DNAHistoneContactProb.o)
+PERFORMKMEANS= $(addprefix $(OBJDIR)/, performKMeans.o)
 #TEST= $(addprefix $(OBJDIR)/, test.o DCDWriter.o DCDParser.o)
 TEST= $(addprefix $(OBJDIR)/, test.o DCDReader.o DCDParser.o)
 
@@ -143,8 +161,41 @@ kmeans4emdcontact: $(KMEANS4EMDCONTACT)
 kmeans4sscontact: $(KMEANS4SSCONTACT)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, kmeans4sscontact) $(KMEANS4SSCONTACT) -lopencv_core -lopencv_imgproc
 
+kmeans4jscontact: $(KMEANS4JSCONTACT)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, kmeans4jscontact) $(KMEANS4JSCONTACT) -lopencv_core -lopencv_imgproc
+
+kmeans4dscontact: $(KMEANS4DSCONTACT)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, kmeans4dscontact) $(KMEANS4DSCONTACT) -lopencv_core -lopencv_imgproc
+
 divideclusteredcs: $(DIVIDECLUSTEREDCS)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, divideclusteredcs) $(DIVIDECLUSTEREDCS)
+
+generatedummydata: $(GENERATEDUMMYDATA)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, generatedummydata) $(GENERATEDUMMYDATA)
+
+calcgapstatistic: $(CALCGAPSTATISTIC)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, calcgapstatistic) $(CALCGAPSTATISTIC)
+
+s_densbw: $(S_DENSBW)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, s_densbw) $(S_DENSBW)
+
+countcontacts: $(COUNTCONTACTS)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, countcontacts) $(COUNTCONTACTS)
+
+histogram_ignorenan: $(HISTOGRAMIGNORENAN)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, histogram_ignorenan) $(HISTOGRAMIGNORENAN)
+
+divide_contactstate: $(DIVIDECONTACTSTATE)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, divide_contactstate) $(DIVIDECONTACTSTATE)
+
+calc_dnahiscontactprob: $(CALCDNAHISCONTACTPROB)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, calc_dnahiscontactprob) $(CALCDNAHISCONTACTPROB)
+
+perform_kmeans: $(PERFORMKMEANS)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, perform_kmeans) $(PERFORMKMEANS)
+
+make_contactprob: $(MAKECONTACTPROB)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(EXEDIR)/, make_contactprob) $(MAKECONTACTPROB)
 
 # clean
 clean:
@@ -284,8 +335,42 @@ $(addprefix $(OBJDIR)/, kmeansEMDClusteringStates.o): kmeansEMDClusteringStates.
 $(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o): kmeansSSClusteringStates.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, kmeansSSClusteringStates.o) -c kmeansSSClusteringStates.cpp
 
+$(addprefix $(OBJDIR)/, kmeansJSClusteringStates.o): kmeansJSClusteringStates.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, kmeansJSClusteringStates.o) -c kmeansJSClusteringStates.cpp
+
+$(addprefix $(OBJDIR)/, kmeansDSClusteringStates.o): kmeansDSClusteringStates.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, kmeansDSClusteringStates.o) -c kmeansDSClusteringStates.cpp
+
 $(addprefix $(OBJDIR)/, divideCSFromClustering.o): divideCSFromClustering.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, divideCSFromClustering.o) -c divideCSFromClustering.cpp
+
+$(addprefix $(OBJDIR)/, generateDummyData4kmeans.o): generateDummyData4kmeans.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, generateDummyData4kmeans.o) -c generateDummyData4kmeans.cpp
+
+$(addprefix $(OBJDIR)/, calcGapStatistic.o): calcGapStatistic.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, calcGapStatistic.o) -c calcGapStatistic.cpp
+
+$(addprefix $(OBJDIR)/, S_Dbw.o): S_Dbw.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, S_Dbw.o) -c S_Dbw.cpp
+
+$(addprefix $(OBJDIR)/, countContacts.o): countContacts.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, countContacts.o) -c countContacts.cpp
+
+$(addprefix $(OBJDIR)/, HistogramIgnoreNaN.o): HistogramIgnoreNaN.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, HistogramIgnoreNaN.o) -c HistogramIgnoreNaN.cpp
+
+$(addprefix $(OBJDIR)/, divideContactState.o): divideContactState.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, divideContactState.o) -c divideContactState.cpp
+
+$(addprefix $(OBJDIR)/, DNAHistoneContactProb.o): DNAHistoneContactProb.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, DNAHistoneContactProb.o) -c DNAHistoneContactProb.cpp
+
+$(addprefix $(OBJDIR)/, performKMeans.o): performKMeans.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, performKMeans.o) -c performKMeans.cpp
+
+$(addprefix $(OBJDIR)/, makeContactProb.o): makeContactProb.cpp
+	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, makeContactProb.o) -c makeContactProb.cpp
+
 
 $(addprefix $(OBJDIR)/, test.o): test.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -o $(addprefix $(OBJDIR)/, test.o) -c test.cpp

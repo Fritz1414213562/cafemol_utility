@@ -11,16 +11,22 @@
 
 int main(int argc, char *argv[]) {
 
+	if (argc != 5) {
+		std::cerr << "too much or less arguments" << std::endl;
+		std::exit(1);
+	}
+
 	// for file stream
     std::string dcd_name = argv[1];
 	std::string pdb_name = argv[2];
 	std::string output_name = argv[3];
+	float cutoff = std::stof(argv[4]);
     std::string dcd_suffix = "dcd";
 	std::string pdb_suffix = "pdb";
 	// ---------------------------------------------------------------------------------
 	// local constant
-	// float cutoff = 6.5; // The cutoff length of native contact in cafemol
-	float cutoff = 8.0; // The cutoff length of native contact in cafemol
+//	float cutoff = 6.5; // The cutoff length of native contact in cafemol
+//	float cutoff = 8.0; // The cutoff length of native contact in cafemol
 	// local ID in a Histone monomer.
 	int local_His3_begin = 45;
 	int local_His3_end = 135;

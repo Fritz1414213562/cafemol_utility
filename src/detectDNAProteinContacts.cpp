@@ -15,15 +15,16 @@ int main(int argc, char *argv[]) {
 
 	cafemol::error_handling::Error_Output error_output = cafemol::error_handling::Error_Output();
 	// check command line arguments
-	if (argc != 4) error_output("too much or less arguments");
+	if (argc != 5) error_output("too much or less arguments");
 	cafemol::output_handling::Standard_Output standard_output = cafemol::output_handling::Standard_Output();
 
 	std::array<std::string, 2> input_names = {argv[1], argv[2]};
 	std::string output_name = argv[3];
+	const float& cutoff = std::stof(argv[4]);
 
 	// default value
-	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address.par";
-	const float cutoff = 10.0;
+	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address";
+//	const float cutoff = 10.0;
 	const int block_size = 80;
 	const int elonged_601_length = 275;
 

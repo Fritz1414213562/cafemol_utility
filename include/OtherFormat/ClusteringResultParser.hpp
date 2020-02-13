@@ -1,6 +1,6 @@
 #ifndef CLUSTERING_RESULT_PARSER_HPP
 #define CLUSTERING_RESULT_PARSER_HPP
-#include<ErrorMessage.hpp>
+#include<IO/ErrorMessage.hpp>
 #include<UtilFunc.hpp>
 #include<iostream>
 #include<fstream>
@@ -29,21 +29,22 @@ public:
 
 protected:
 
-	cafemol::error_handling::Error_Output eout = cafemol::error_handling::Error_Output();
+//	cafemol::error_handling::Error_Output eout = cafemol::error_handling::Error_Output();
+	CafeInLess::IO::Error_Output eout = CafeInLess::IO::Error_Output();
 	std::ifstream input_file;
 
 	void open_File() {
 		close_File();
 		input_file.open(input_name);
-		if (!input_file.is_open()) eout("The file, " + input_name + " could not be found.");
+		if (!input_file.is_open()) eout("The file,", input_name, "could not be found.");
 	}
 
 	std::vector<std::string> split_Line(const std::string& line) {
 		return cafemol::library::split_String(line, delimiter, comment_out_char);
 	}
 
-	std::vector<int> split_ClusterIDLine(const std::string& line) {
-		return cafemol::library::split_String2Int(line, delimiter);
+	std::vector<std::size_t> split_ClusterIDLine(const std::string& line) {
+		return cafemol::library::split_String2UnsignedLong(line, delimiter);
 	}
 
 private:

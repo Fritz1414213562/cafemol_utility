@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
 	// default value
 	//// parameter file
-	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address.par";
+	const std::string parameter_name = "/home/nagae/cafemol/torus_cafemol/collision_to_torus/utility/para/histone_address";
 	//// block size
 	const int block_size = 100;
 	//// for contact state file format

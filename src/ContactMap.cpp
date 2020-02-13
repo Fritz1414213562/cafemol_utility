@@ -1,9 +1,6 @@
 #include<ErrorMessage.hpp>
 #include<StandardOutput.hpp>
-#include<DCD/DCDReader.hpp>
-#include<detectContacts.hpp>
-#include<FileOpenJudge.hpp>
-#include<CafemolName.hpp>
+#include<OtherFormat/ContactStateReader.hpp>
 #include<fstream>
 #include<string>
 #include<memory>

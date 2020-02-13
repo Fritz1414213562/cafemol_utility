@@ -1,0 +1,2 @@
+g++ -std=c++17 -pedantic -Wall -g -O2 -I. -I../include -I../include/misc -I/usr/local/include/eigen3 -I/usr/local/include/opencv4 -o ./obj/kmeansClusteringStates.o -c kmeansClusteringStates.cpp
+Makefile:274: recipe for target 'obj/kmeansClusteringStates.o' failed

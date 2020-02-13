@@ -1,0 +1,8 @@
+#ifndef K_MEANS
+#define K_MEANS
+#include<KMeans.hpp>
+#include<KMeans_Flag.hpp>
+//#include<KMeans_Type.hpp>
+
+
+#endif /* K_MEANS */

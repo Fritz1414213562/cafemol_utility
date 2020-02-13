@@ -37,10 +37,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	std::unique_ptr<cafemol::DCDReader> dcd_reader = std::make_unique<cafemol::DCDReader>(input_name);
-	cafemol::Trajectories dcd_trajectory = dcd_reader->get_Trajectory();
+	cafemol::Trajectory dcd_trajectory = dcd_reader->get_Trajectory();
 //	cafemol::EigenTrajectory dcd_trajectory;
 
-	std::unique_ptr<cafemol::library::PCA_Performer> PCA = std::make_unique<cafemol::library::PCA_Performer>(output_name);
+	std::unique_ptr<cafemol::analysis::PCA_Performer> PCA = std::make_unique<cafemol::analysis::PCA_Performer>(output_name);
+//	std::unique_ptr<cafemol::library::PCA_Performer> PCA = std::make_unique<cafemol::library::PCA_Performer>(output_name);
 
 //	if (i_flag_move2origin == 1) PCA->set_Trajectory2Origin();
 //	else {};

@@ -1,0 +1,17 @@
+#include<Eigen/Core>
+#include<ErrorMessage.hpp>
+#include<StandardOutput.hpp>
+
+
+int main(int argc, char* argv[]) {
+
+	if (argc
+
+	const std::string& input_prefix = argv[1];
+	const std::size_t& filenum = std::stoi(argv[2]);
+	const std::string& input_suffix = argv[3];
+	const std::string& output_name = argv[4];
+
+
+	return 0;
+}

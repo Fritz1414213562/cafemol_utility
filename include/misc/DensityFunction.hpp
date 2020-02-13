@@ -2,6 +2,7 @@
 #define DENSITY_FUNCTION_HPP
 #include<UtilContainer.hpp>
 #include<ErrorMessage.hpp>
+#include<StandardOutput.hpp>
 #include<cmath>
 #include<vector>
 #include<array>
@@ -29,6 +30,8 @@ public:
 	// -----------------------------------------------------------------------------------
 	void set_DataRange(const InputType& data_left_lim, const InputType& data_right_lim){
 		if (data_left_lim >= data_right_lim) eout("Invalid range set-up, left >= right");
+
+		sout("Set Data range");
 		data_range[0] = data_left_lim;
 		data_range[1] = data_right_lim;
 	}
@@ -80,6 +83,39 @@ public:
 		return result;
 	}
 
+
+	// -----------------------------------------------------------------------------------
+	std::vector<HistogramData<int, std::size_t>> make_Density(const std::vector<int>& vec) {
+		
+		int data_left_lim;
+		int data_right_lim;
+		if (data_range.empty()) {
+			std::vector<int>::const_iterator vec_min_itr = std::min_element(vec.begin(), vec.end());
+			std::vector<int>::const_iterator vec_max_itr = std::max_element(vec.begin(), vec.end());
+			data_left_lim = *vec_min_itr;
+			data_right_lim = *vec_max_itr;
+		}
+		else {
+			data_left_lim = data_range[0];
+			data_right_lim = data_range[1];
+		}
+
+		const int& data_range_size = data_right_lim - data_left_lim + 1;
+		std::vector<HistogramData<int, std::size_t>> result(data_range_size, std::make_tuple(0, 0));
+
+		for (int data_range_idx = 0; data_range_idx < data_range_size; ++data_range_idx) {
+			std::get<0>(result[data_range_idx]) = data_left_lim + data_range_idx;
+		}
+
+		for (std::size_t vec_idx = 0; vec_idx < vec.size(); ++vec_idx) {
+			if ((vec[vec_idx] < data_left_lim) || (vec[vec_idx] > data_right_lim)) continue;
+			
+			++std::get<1>(result[vec[vec_idx] - data_left_lim]);
+		}
+
+		return result;
+	}
+
 	// -----------------------------------------------------------------------------------
 	std::vector<HistMapData<InputType, OutputType>> make_Density(const std::array<std::vector<InputType>, 2>& vec, const std::array<InputType, 2>& bin_widths) {
 
@@ -117,6 +153,7 @@ private:
 	std::array<InputType, 4> data_xy_range;
 
 	cafemol::error_handling::Error_Output eout = cafemol::error_handling::Error_Output();
+	cafemol::output_handling::Standard_Output sout = cafemol::output_handling::Standard_Output();
 
 	// -----------------------------------------------------------------------------------
 
